@@ -10,12 +10,12 @@ Motor::Motor(int forwardPin, int backwardPin, int pwmPin) {
     pinMode(forwardPin, OUTPUT);
     pinMode(backwardPin, OUTPUT);
     pinMode(pwmPin, OUTPUT);
-    this->lastTime = millis();
+    this->lastTime = micros();
 }
 
-void Motor::setVelocity(int velocity){
+void Motor::setVelocity(float velocity){
     // make sure the requested velocity is within the set bounds
-    if (velocity > maxVelocity) {
+    if (abs(velocity - maxVelocity) < 0.1 ) {
         velocity = maxVelocity;
     }
     else if (velocity < -maxVelocity) {
@@ -51,7 +51,7 @@ int Motor::getTargetVelocity() {
 }
 
 int Motor::getVelocity() {
-    return current_velocity;
+    return int(current_velocity);
 }
 
 void Motor::setMaxVelocity(int maxVelocity) {
@@ -72,39 +72,37 @@ int Motor::getAcceleration() {
 
 void Motor::update(){
     // if the current velocity is equal to the target velocity, do nothing
-    if (current_velocity == target_velocity) {
-        this->lastTime = millis();
+    if (abs(current_velocity - target_velocity) < 0.1) {
+        current_velocity = target_velocity;
+        this->lastTime = micros();
         return;
     }
     // calculate the time since the last update
-    int dt = int(millis() - lastTime);
-    this->lastTime = millis();
+    float dt = float(micros() - lastTime)/1000000;
+    Serial.print("dt: ");
+    Serial.println(dt, 5);
+    this->lastTime = micros();
 
-    int newVel = current_velocity;
+    float newVel = current_velocity;
     // calculate the new velocity based on the acceleration
     if (current_velocity < target_velocity) {
-        int newVel = newVel + acceleration * dt;
+        newVel = newVel + float(acceleration) * dt;
     }
     else if (current_velocity > target_velocity) {
-        int newVel = newVel - acceleration * dt;
+        newVel = newVel - float(acceleration) * dt;
     }
 
-    // If the new velocity is greater than the target velocity, set the new velocity to the target velocity
-    if (newVel > target_velocity) {
-        newVel = target_velocity;
-    }
-    else if (newVel < -target_velocity) {
-        newVel = -target_velocity;
-    }
+    Serial.print("New Velocity: ");
+    Serial.println(newVel, 5);
     
-    setVelocity(target_velocity);
+    setVelocity(newVel);
 }
 
 void Motor::print(){
     Serial.print("Target Velocity: ");
     Serial.println(target_velocity);
     Serial.print("Current Velocity: ");
-    Serial.println(current_velocity);
+    Serial.println(int(current_velocity));
     Serial.print("Max Velocity: ");
     Serial.println(maxVelocity);
     Serial.print("Acceleration: ");

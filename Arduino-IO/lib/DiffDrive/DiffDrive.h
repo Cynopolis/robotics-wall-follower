@@ -36,8 +36,8 @@ class DiffDrive{
 
         /**
          * @brief Set the direction vector of the differential drive
-         * @param magnitude The magnitude of the direction vector
-         * @param angle The angle of the direction vector
+         * @param magnitude The magnitude of the direction vector 0-100
+         * @param angle The angle of the direction vector 0-360 degrees
          * @return None.
          */
         void setDirectionVector(float magnitude, float angle);

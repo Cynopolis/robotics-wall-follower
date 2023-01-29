@@ -72,9 +72,9 @@ class Motor {
 
     protected:
         int target_velocity = 0;
-        int current_velocity = 0;
+        float current_velocity = 0;
         int maxVelocity = 100;
-        int acceleration = 1;
+        int acceleration = 150;
         int forwardPin;
         int backwardPin;
         int pwmPin;
@@ -85,6 +85,6 @@ class Motor {
          * @param velocity The velocity to set the motor to
          * @return None.
          */
-        void setVelocity(int velocity);
+        void setVelocity(float velocity);
 
 };
