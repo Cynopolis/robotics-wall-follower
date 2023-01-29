@@ -1,4 +1,7 @@
 #include <Arduino.h>
+#include "Pinout.h"
+#include "Motor.h"
+
 
 void setup() {
   // put your setup code here, to run once:
