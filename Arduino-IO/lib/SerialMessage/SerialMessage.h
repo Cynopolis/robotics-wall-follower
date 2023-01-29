@@ -1,4 +1,12 @@
-#include "MemorySize.h"
+// define some cosntants
+#define MOTOR_READ 0
+#define MOTOR_WRITE 1
+#define SONAR_READ 2
+#define SONAR_WRITE 3
+#define IR_READ 4
+#define num_chars 100
+
+
 class SerialMessage{
     public:
         /**
@@ -11,18 +19,6 @@ class SerialMessage{
          * @brief Update the SerialMessage object and parse any data that's available
          */
         void update();
-
-        /**
-         * @brief Print a message to the serial monitor with a newline
-         * @param message the message to print
-         */
-        void println(char message[]);
-
-        /**
-         * @brief Print a message to the serial monitor
-         * @param message the message to print
-         */
-        void print(char message[]);
 
         /**
          * @brief Returns true if there is new data available

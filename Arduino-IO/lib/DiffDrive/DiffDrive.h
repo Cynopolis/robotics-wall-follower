@@ -48,6 +48,42 @@ class DiffDrive{
          */
         virtual void update();
 
+        /**
+         * @brief Get the acceleration constant for the motors
+         * @return The acceleration constant for the motors
+         */
+        int getAcceleration();
+        
+        /**
+         * @brief Get the maximum velocity of the motors
+         * @return The maximum velocity of the motors
+         */
+        int getMaxVelocity();
+
+        /**
+         * @brief Get the left motor velocity
+         * @return The current velocity of the left motor
+         */
+        int getLeftCurrentVelocity();
+
+        /**
+         * @brief Get the right motor velocity
+         * @return The current velocity of the right motor
+         */
+        int getRightCurrentVelocity();
+
+        /**
+         * @brief Get the left target motor velocity
+         * @return The target velocity of the left motor
+         */
+        int getLeftTargetVelocity();
+
+        /**
+         * @brief Get the right target motor velocity
+         * @return The target velocity of the right motor
+         */
+        int getRightTargetVelocity();
+
     protected:
         Motor leftMotor;
         Motor rightMotor;

@@ -73,14 +73,6 @@ void SerialMessage::update(){
     }
 }
 
-void SerialMessage::println(char message[]){
-    Serial.println(message);
-}
-
-void SerialMessage::print(char message[]){
-    Serial.print(message);
-}
-
 bool SerialMessage::isNewData(){
     return new_data;
 }
