@@ -22,9 +22,13 @@ void DiffDrive::setAcceleration(int maxAcceleration) {
 }
 
 void DiffDrive::setDirectionVector(float magnitude, float angle) {
-    angle = angle * PI / 180;
+    angle = (angle+45) * PI / 180;
     int leftTargetVelocity = int(magnitude * cos(angle));
     int rightTargetVelocity = int(magnitude * sin(angle));
+    // Serial.print("Left: ");
+    // Serial.print(leftTargetVelocity);
+    // Serial.print(" Right: ");
+    // Serial.println(rightTargetVelocity);
     setTargetVelocity(leftTargetVelocity, rightTargetVelocity);
 }
 

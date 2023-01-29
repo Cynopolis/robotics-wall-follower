@@ -2,15 +2,15 @@
 #include <Arduino.h>
 
 Motor::Motor(int forwardPin, int backwardPin, int pwmPin) {
-    forwardPin = forwardPin;
-    backwardPin = backwardPin;
-    pwmPin = pwmPin;
+    this->forwardPin = forwardPin;
+    this->backwardPin = backwardPin;
+    this->pwmPin = pwmPin;
 
     // set the pins as outputs:
     pinMode(forwardPin, OUTPUT);
     pinMode(backwardPin, OUTPUT);
     pinMode(pwmPin, OUTPUT);
-    lastTime = millis();
+    this->lastTime = millis();
 }
 
 void Motor::setVelocity(int velocity){
@@ -21,7 +21,6 @@ void Motor::setVelocity(int velocity){
     else if (velocity < -maxVelocity) {
         velocity = -maxVelocity;
     }
-    
     // set the new motor direction based on the sign of the velocity
     if (velocity > 0) {
         digitalWrite(forwardPin, HIGH);
@@ -36,15 +35,15 @@ void Motor::setVelocity(int velocity){
         digitalWrite(backwardPin, LOW);
     }
     // set the current velocity to the requested velocity
-    current_velocity = velocity;
+    this->current_velocity = velocity;
     // map the velocity to the analog range of the PWM pin
-    velocity = map(abs(velocity), 0, maxVelocity, 0, 1023);
+    velocity = map(abs(velocity), 0, maxVelocity, 0, 255);
     // write the new velocity to the PWM pin
     analogWrite(pwmPin, velocity);
 }
 
 void Motor::setTargetVelocity(int targetVelocity) {
-    target_velocity = targetVelocity;
+    this->target_velocity = targetVelocity;
 }
 
 int Motor::getTargetVelocity() {
@@ -56,7 +55,7 @@ int Motor::getVelocity() {
 }
 
 void Motor::setMaxVelocity(int maxVelocity) {
-    maxVelocity = maxVelocity;
+    this->maxVelocity = maxVelocity;
 }
 
 int Motor::getMaxVelocity() {
@@ -64,7 +63,7 @@ int Motor::getMaxVelocity() {
 }
 
 void Motor::setAcceleration(int acceleration) {
-    acceleration = acceleration;
+    this->acceleration = acceleration;
 }
 
 int Motor::getAcceleration() {
@@ -74,15 +73,21 @@ int Motor::getAcceleration() {
 void Motor::update(){
     // if the current velocity is equal to the target velocity, do nothing
     if (current_velocity == target_velocity) {
-        lastTime = millis();
+        this->lastTime = millis();
         return;
     }
     // calculate the time since the last update
     int dt = int(millis() - lastTime);
-    lastTime = millis();
+    this->lastTime = millis();
 
+    int newVel = current_velocity;
     // calculate the new velocity based on the acceleration
-    int newVel = current_velocity + acceleration * dt;
+    if (current_velocity < target_velocity) {
+        int newVel = newVel + acceleration * dt;
+    }
+    else if (current_velocity > target_velocity) {
+        int newVel = newVel - acceleration * dt;
+    }
 
     // If the new velocity is greater than the target velocity, set the new velocity to the target velocity
     if (newVel > target_velocity) {
@@ -91,6 +96,24 @@ void Motor::update(){
     else if (newVel < -target_velocity) {
         newVel = -target_velocity;
     }
+    
+    setVelocity(target_velocity);
+}
 
-    setVelocity(newVel);
+void Motor::print(){
+    Serial.print("Target Velocity: ");
+    Serial.println(target_velocity);
+    Serial.print("Current Velocity: ");
+    Serial.println(current_velocity);
+    Serial.print("Max Velocity: ");
+    Serial.println(maxVelocity);
+    Serial.print("Acceleration: ");
+    Serial.println(acceleration);
+
+    Serial.print("Forward Pin: ");
+    Serial.println(forwardPin);
+    Serial.print("Backward Pin: ");
+    Serial.println(backwardPin);
+    Serial.print("PWM Pin: ");
+    Serial.println(pwmPin);
 }

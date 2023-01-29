@@ -64,11 +64,17 @@ class Motor {
          */
         void update();
 
+        /**
+         * @brief print out the current state of the motor
+         * @return None.
+         */
+        void print();
+
     protected:
         int target_velocity = 0;
         int current_velocity = 0;
-        int maxVelocity = 1000;
-        int acceleration = 100;
+        int maxVelocity = 100;
+        int acceleration = 1;
         int forwardPin;
         int backwardPin;
         int pwmPin;

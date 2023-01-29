@@ -3,29 +3,29 @@
 
 DiffDriveFeedback::DiffDriveFeedback(Motor leftMotor, Motor rightMotor, Encoder leftEncoder, Encoder rightEncoder)
  : DiffDrive(leftMotor, rightMotor), leftEncoder(leftEncoder), rightEncoder(rightEncoder) {
-    lastTime = millis();
+    this->lastTime = millis();
  }
 
- void DiffDriveFeedback::setPID(float kp, float ki, float kd) {
-     kp = kp;
-     ki = ki;
-     kd = kd;
+ void DiffDriveFeedback::setPID(float kp, float ki, float kd){
+     this->kp = kp;
+     this->ki = ki;
+     this->kd = kd;
  }
 
 void DiffDriveFeedback::getOrientation() {
     double leftDistance = double(leftEncoder.read()) * stepsToMM;
     double rightDistance = double(rightEncoder.read()) * stepsToMM;
     
-    lastDistance = distance;
-    distance = (leftDistance + rightDistance) / 2;
+    this->lastDistance = distance;
+    this->distance = (leftDistance + rightDistance) / 2;
     //TODO: check if this is correct
-    lastAngle = angle;
-    angle = (rightDistance - leftDistance) / wheelBase;
+    this->lastAngle = angle;
+    this->angle = (rightDistance - leftDistance) / wheelBase;
 }
 
  void DiffDriveFeedback::update(){
     int dt = millis() - lastTime;
-    lastTime = millis();
+    this->lastTime = millis();
 
     getOrientation();
 
@@ -33,12 +33,12 @@ void DiffDriveFeedback::getOrientation() {
     double angleError = targetAngle - angle;
 
     // calculate new velocity PID
-    sumDistanceError += distanceError * dt;
+    this->sumDistanceError += distanceError * dt;
     double diff = kd* (distance - lastDistance) / dt;
     double newVelocity = kp * distanceError + diff + ki * sumDistanceError;
 
     // calculate new angle PID
-    sumAngleError += angleError * dt;
+    this->sumAngleError += angleError * dt;
     diff = kd* (angle - lastAngle) / dt;
     double newAngleVelocity = kp * angleError + diff + ki * sumAngleError;
 
