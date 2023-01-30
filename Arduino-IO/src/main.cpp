@@ -2,6 +2,10 @@
 #include "Pinout.h"
 #include "SerialMessage.h"
 #include "Motor.h"
+#include "Sonar.h"
+
+Sonar sonar(trig_pin, echo_pin);
+Servo servo;
 
 Motor leftMotor(pinLF, pinLB, Lpwm_pin);
 Motor rightMotor(pinRF, pinRB, Rpwm_pin);
@@ -20,13 +24,18 @@ SerialMessage ser;
 unsigned long timer = 0;
 void setup() {
   Serial.begin(115200);
-  delay(100);
-  timer = millis();
   Serial.println("Starting up...");
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
   delay(100);
   digitalWrite(13, LOW);
+  servo.attach(servo_pin);
+  servo.write(90);
+  sonar.attachServo(servo);
+
+  sonar.enableScanMode(true);
+  Serial.println("Started");
+  timer = millis();
 }
 
 // TODO: Finish writing this function
@@ -54,13 +63,19 @@ void doSerialCommand(int * args, int args_length) {
       #endif
       break;
     case SONAR_READ:
-      //ser.println("SONAR_READ");
+      Serial.print("!SNR,");
+      Serial.print(sonar.getAngleIncrement());
+      sonar.print();
+      Serial.println(";");
       break;
     case SONAR_WRITE:
+      if(args_length < 2) break;
+      sonar.enableScanMode(args[1]==1);
+      sonar.setAngleIncrement(args[2]);
       Serial.println("SNR");
       break;
     case IR_READ:
-      //ser.println("IR_READ");
+      Serial.println("IR_READ");
       break;
     default:
       Serial.println("ERR");
@@ -85,4 +100,5 @@ void loop() {
     digitalWrite(13, !digitalRead(13));
   }
   wheels.update();
+  sonar.update();
 }
