@@ -6,6 +6,11 @@ DiffDrive::DiffDrive(Motor leftMotor, Motor rightMotor)
 {
 }
 
+void DiffDrive::setup() {
+    leftMotor.setup();
+    rightMotor.setup();
+}
+
 void DiffDrive::setTargetVelocity(int leftTargetVelocity, int rightTargetVelocity) {
     leftMotor.setTargetVelocity(leftTargetVelocity);
     rightMotor.setTargetVelocity(rightTargetVelocity);

@@ -1,9 +1,11 @@
 #include <Arduino.h>
 #include "Pinout.h"
+#include "EncoderDiffDrive.h"
 
 long leftEncoderCount = 0;
 long rightEncoderCount = 0;
 
+// Incriment / Decrement depending on encoder state during an interrupt
 void leftEncoderInc(){
   if (digitalRead(left_encoder_pinA) && digitalRead(left_encoder_pinB)) {
     leftEncoderCount++;
@@ -12,6 +14,7 @@ void leftEncoderInc(){
   }
 }
 
+// Incriment / Decrement depending on encoder state during an interrupt
 void rightEncoderInc(){
   if (digitalRead(right_encoder_pinA) && digitalRead(right_encoder_pinB)) {
     rightEncoderCount++;
@@ -20,10 +23,16 @@ void rightEncoderInc(){
   }
 }
 
+EncodedMotor leftMotor(pinLF, pinLB, Lpwm_pin, left_encoder_pinA, left_encoder_pinB);
+EncodedMotor rightMotor(pinRF, pinRB, Rpwm_pin, right_encoder_pinA, right_encoder_pinB);
+EncoderDiffDrive diffDrive(leftMotor, rightMotor);
+
 unsigned long timer = 0;
 void setup() {
   Serial.begin(serial_baud);
-  // TODO: set up the encoded wheels and make sure hteir initialized first
+  // this must be called before we attach any interrupts
+  diffDrive.setup();
+  // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);
 
@@ -41,4 +50,6 @@ void loop() {
     }
     timer = millis();
   }
+
+  diffDrive.update(&leftEncoderCount, &rightEncoderCount);
 }

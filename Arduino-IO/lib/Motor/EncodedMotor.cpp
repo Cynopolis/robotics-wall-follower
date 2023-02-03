@@ -44,9 +44,11 @@ void EncodedMotor::setPID(float kp, float ki, float kd) {
     this->kd = kd;
 }
 
-void EncodedMotor::update(long incriment) {
+void EncodedMotor::update(long *incriment) {
     // update the encoder count
-    this->encoderSteps += incriment;
+    this->encoderSteps += *incriment;
+    // reset the incriment to 0 since we've read from it
+    *incriment = 0;
     float past_error = float(targetEncoderSteps - lastEncoderSteps);
     this->lastEncoderSteps = encoderSteps;
 
@@ -67,3 +69,27 @@ void EncodedMotor::update(long incriment) {
 
     setVelocity(int(velocity));
 }
+
+void EncodedMotor::print() {
+    Serial.print("Encoder Steps: ");
+    Serial.print(encoderSteps);
+    Serial.print(" Target Encoder Steps: ");
+    Serial.print(targetEncoderSteps);
+    Serial.print(" Velocity: ");
+    Serial.print(getVelocity());
+    Serial.print(" Angular Velocity: ");
+    Serial.print(getAngularVelocity());
+    Serial.print(" Distance: ");
+    Serial.print(getDistance());
+    Serial.print(" Wheel Angle: ");
+    Serial.print(wheelAngle);
+    Serial.print(" Wheel Radius: ");
+    Serial.print(wheelRadius);
+    Serial.print(" Kp: ");
+    Serial.print(kp);
+    Serial.print(" Ki: ");
+    Serial.print(ki);
+    Serial.print(" Kd: ");
+    Serial.println(kd);
+}
+

@@ -48,6 +48,13 @@ class DiffDrive{
          */
         virtual void update();
 
+        /**
+         * @brief initialize the pins. MUST be called before any other function and during or after the setup() function in main.cpp.
+         *  @post All pins and IO will be initialized.
+         *  @return None.
+         */
+        virtual void setup();
+
     protected:
         Motor leftMotor;
         Motor rightMotor;

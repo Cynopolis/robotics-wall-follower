@@ -5,11 +5,6 @@ class EncodedMotor : public Motor {
     public:
         EncodedMotor(int forwardPin, int backwardPin, int pwmPin, int encoderPinA, int encoderPinB);
         ~EncodedMotor() = default;
-
-        /**
-         * @brief initialize the pins. MUST be called before any other function and during or after the setup() function in main.cpp.
-         */
-        void setup() override;
         
         /**
          * @brief set the wheel radius
@@ -48,9 +43,10 @@ class EncodedMotor : public Motor {
         /**
          * @brief updates the motor's state with current sensor data
          * @param incriment The number of steps to incriment the encoder count by. (positive or negative)
+         * @post The incriment will be set to 0;
          * @return None.
          */
-        void update(long incriment);
+        void update(long *incriment);
 
         /**
          * @brief print out the current state of the motor
