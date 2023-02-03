@@ -1,3 +1,4 @@
+#pragma once
 #include "Motor.h"
 
 class EncodedMotor : public Motor {
