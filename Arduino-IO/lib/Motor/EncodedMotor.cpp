@@ -44,12 +44,19 @@ void EncodedMotor::setPID(float kp, float ki, float kd) {
     this->kd = kd;
 }
 
-void EncodedMotor::update() {
-    float error = float(targetEncoderSteps - encoderSteps);
-    this->sumError += long(error);
+void EncodedMotor::update(long incriment) {
+    // update the encoder count
+    this->encoderSteps += incriment;
     float past_error = float(targetEncoderSteps - lastEncoderSteps);
+    this->lastEncoderSteps = encoderSteps;
+
+    // update the timer
     float dt = float(millis() - lastTime)*0.001;
     lastTime = millis();
+
+    // update other things
+    float error = float(targetEncoderSteps - encoderSteps);
+    this->sumError += long(error);
 
     float velocity = kp * error + ki * sumError * dt + kd * (error - past_error) / dt;
     

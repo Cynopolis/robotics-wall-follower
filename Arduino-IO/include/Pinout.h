@@ -1,6 +1,9 @@
 #ifndef PINOUT
 #define PINOUT
 
+// define serial
+#define serial_baud 115200
+
 // define motor pins
 #define Lpwm_pin  5     //pin of controlling speed---- ENA of motor driver board
 #define Rpwm_pin  6    //pin of controlling speed---- ENB of motor driver board
@@ -10,9 +13,9 @@
 #define pinRF 8 // will make the right motor go forwards
 
 //define encoder pins
-#define left_encoder_pinA 2
+#define left_encoder_pinA 2 //interrupt pin
 #define left_encoder_pinB 10
-#define right_encoder_pinA 3
+#define right_encoder_pinA 3 // interrupt pin
 #define right_encoder_pinB 11
 
 // define the pins for the sonar sensor

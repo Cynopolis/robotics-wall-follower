@@ -46,9 +46,10 @@ class EncodedMotor : public Motor {
 
         /**
          * @brief updates the motor's state with current sensor data
+         * @param incriment The number of steps to incriment the encoder count by. (positive or negative)
          * @return None.
          */
-        void update() override;
+        void update(long incriment);
 
         /**
          * @brief print out the current state of the motor
