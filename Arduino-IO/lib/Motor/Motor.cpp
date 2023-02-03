@@ -1,11 +1,10 @@
 #include "Motor.h"
 #include <Arduino.h>
 
-Motor::Motor(int forwardPin, int backwardPin, int pwmPin) {
-    this->forwardPin = forwardPin;
-    this->backwardPin = backwardPin;
-    this->pwmPin = pwmPin;
+Motor::Motor(int forwardPin, int backwardPin, int pwmPin) :
+    forwardPin(forwardPin), backwardPin(backwardPin), pwmPin(pwmPin) {}
 
+void Motor::setup(){
     // set the pins as outputs:
     pinMode(forwardPin, OUTPUT);
     pinMode(backwardPin, OUTPUT);

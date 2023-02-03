@@ -79,12 +79,6 @@ class DiffDriveFeedback : public DiffDrive {
         double targetAngle = 0;
         double sumAngleError = 0;
 
-        // wheel diameter is 66 mm
-        // The grear ratio is 120 motor turns : 1 wheel turn
-        // the encoder has 8 steps per motor revolution
-        // or 8*120 = 960 steps per wheel revolution
-        // 66*PI = 207.345 mm per wheel revolution
-        // 207.345/960 = 0.216 mm per step
-        const float stepsToMM = 0.216;
+        
         const float wheelBase = 145; // in mm
 };

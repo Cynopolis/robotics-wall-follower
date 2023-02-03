@@ -11,6 +11,11 @@ class Motor {
          */
         Motor(int forwardPin, int backwardPin, int pwmPin);
         ~Motor() = default;
+        
+        /**
+         * @brief initialize the pins. MUST be called before any other function and during or after the setup() function in main.cpp.
+        */
+        virtual void setup();
 
         /**
          * @brief Set the target velocity of the motor
@@ -29,7 +34,7 @@ class Motor {
          * @brief Get the velocity of the motor
          * @return int The velocity of the motor
          */
-        int getVelocity();
+        virtual int getVelocity();
 
         /**
          * @brief Set the maximum velocity of the motor
@@ -59,16 +64,15 @@ class Motor {
 
         /**
          * @brief updates the current velocity of the motor
-         * @param time The current time in milliseconds
          * @return None.
          */
-        void update();
+        virtual void update();
 
         /**
          * @brief print out the current state of the motor
          * @return None.
          */
-        void print();
+        virtual void print();
 
     protected:
         int target_velocity = 0;
