@@ -34,3 +34,12 @@ void EncoderDiffDrive::print(){
     this->encodedLeftMotor->print();
     this->encodedRightMotor->print();
 }
+
+float EncoderDiffDrive::getLeftDistance(){
+    return this->encodedLeftMotor->getDistance();
+}
+
+float EncoderDiffDrive::getRightDistance(){
+    return this->encodedRightMotor->getDistance();
+}
+

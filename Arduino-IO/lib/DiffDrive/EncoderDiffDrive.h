@@ -19,7 +19,7 @@ class EncoderDiffDrive : public DiffDrive {
          * @brief initialize the pins. MUST be called before any other function and during or after the setup() function in main.cpp.
          * @return None.
          */
-        void setup();
+        //void setup();
 
         /**
          * @brief Update motors
@@ -48,6 +48,19 @@ class EncoderDiffDrive : public DiffDrive {
          * @return float The angular velocity of the right motor
          */
         float getRightAngularVelocity();
+
+        /**
+         * @brief Get the distance travelled by the left wheel
+         * @return a float for how far the left wheel has travelled in mm.
+         */
+        float getLeftDistance();
+
+        /**
+         * @brief Get the distance travelled by the right wheel
+         * @return a float for how far the right wheel has travelled in mm.
+         */
+        float getRightDistance();
+
 
         /**
          * @ brief set PID constants for each motor

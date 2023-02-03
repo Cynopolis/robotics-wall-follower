@@ -58,7 +58,7 @@ void SerialMessage::update(){
         // this temporary copy is necessary to protect the original data
         //   because strtok() used in parseData() replaces the commas with \0
         parseData();
-        printArgs();
+        //printArgs();
 
         // TODO: add code to do something with the data
         data_recieved = false;

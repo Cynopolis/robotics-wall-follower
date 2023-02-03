@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include "Pinout.h"
 #include "SerialMessage.h"
-#include "EncoderDiffDrive.h"
 
 long leftEncoderCount = 0;
 long rightEncoderCount = 0;
@@ -25,10 +24,10 @@ void rightEncoderInc(){
 }
 
 #ifdef USE_ENCODERS
-  #include "DiffDriveFeedback.h"
+  #include "EncoderDiffDrive.h"
   EncodedMotor leftMotor(pinLF, pinLB, Lpwm_pin, left_encoder_pinA, left_encoder_pinB);
   EncodedMotor rightMotor(pinRF, pinRB, Rpwm_pin, right_encoder_pinA, right_encoder_pinB);
-  DiffDriveFeedback wheels(leftMotor, rightMotor, leftEncoder, rightEncoder);
+  EncoderDiffDrive wheels(leftMotor, rightMotor);
 #else
   #include "DiffDrive.h"
   Motor leftMotor(pinLF, pinLB, Lpwm_pin);
@@ -62,23 +61,16 @@ void doSerialCommand(int * args, int args_length) {
       Serial.print(String(wheels.getAcceleration()) + "," + String(wheels.getMaxVelocity()));
       Serial.print("," + String(wheels.getLeftTargetVelocity()) + "," + String(wheels.getRightTargetVelocity()));
       #ifdef USE_ENCODERS
-        Serial.print("," + String(wheels.getDistance()) + "," + String(wheels.getAngle()));
+        Serial.print("," + String(wheels.getLeftDistance()) + "," + String(wheels.getRightDistance()));
       #endif
       Serial.println(";");
       break;
     case MOTOR_WRITE:
-      #ifdef USE_ENCODERS
-        if(args_length < 5) break;
-        Serial.println("MTR");
-        wheels.setCurrentPosition(double(args[1])/1000, double(args[2])/1000);
-        wheels.setTarget(double(args[3])/1000, double(args[4])/1000);
-      #else
-        if(args_length < 3) break;
-        Serial.println("MTR");
-        wheels.setDirectionVector(args[1], args[2]);
-      #endif
+      if(args_length < 3) break;
+      Serial.println("MTR");
+      wheels.setTargetVelocity(args[1], args[2]);
       break;
-    case SONAR_READ:
+    case SONAR_READ: 
       //ser.println("SONAR_READ");
       break;
     case SONAR_WRITE:
@@ -99,7 +91,7 @@ void loop() {
     int * args = ser.getArgs();
     int args_length = ser.getPopulatedArgs();
 
-    ser.printArgs();
+    //ser.printArgs();
 
     doSerialCommand(args, args_length);
     ser.clearNewData();

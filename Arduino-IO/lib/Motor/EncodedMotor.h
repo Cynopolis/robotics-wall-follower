@@ -55,10 +55,10 @@ class EncodedMotor : public Motor {
         void print() override;
 
         /**
-         * @brief Set the wheel radius of the motor
-         * @param wheelRadius The wheel radius of the motor
-        */
-        void setWheelRadius(float wheelRadius);
+         * @brief Setup the motor
+         * @return None.
+         */
+        void setup() override;
 
     
     protected:

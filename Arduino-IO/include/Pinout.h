@@ -1,5 +1,5 @@
 #pragma once
-//#define USE_ENCODERS //uncomment this line to use encoders
+#define USE_ENCODERS //uncomment this line to use encoders
 
 // define serial
 #define serial_baud 115200
