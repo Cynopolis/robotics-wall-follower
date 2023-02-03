@@ -1,5 +1,5 @@
-#ifndef PINOUT
-#define PINOUT
+#pragma once
+//#define USE_ENCODERS //uncomment this line to use encoders
 
 // define serial
 #define serial_baud 115200
@@ -31,4 +31,3 @@
 //Define pins for I2C
 #define SDA_pin 18
 #define SCL_pin 19
-#endif

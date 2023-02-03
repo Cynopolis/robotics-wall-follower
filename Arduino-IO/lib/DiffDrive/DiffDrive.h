@@ -36,8 +36,8 @@ class DiffDrive{
 
         /**
          * @brief Set the direction vector of the differential drive
-         * @param magnitude The magnitude of the direction vector
-         * @param angle The angle of the direction vector
+         * @param magnitude The magnitude of the direction vector 0-100
+         * @param angle The angle of the direction vector 0-360 degrees
          * @return None.
          */
         void setDirectionVector(float magnitude, float angle);
@@ -47,6 +47,42 @@ class DiffDrive{
          * @return None.
          */
         virtual void update();
+
+        /**
+         * @brief Get the acceleration constant for the motors
+         * @return The acceleration constant for the motors
+         */
+        int getAcceleration();
+        
+        /**
+         * @brief Get the maximum velocity of the motors
+         * @return The maximum velocity of the motors
+         */
+        int getMaxVelocity();
+
+        /**
+         * @brief Get the left motor velocity
+         * @return The current velocity of the left motor
+         */
+        int getLeftCurrentVelocity();
+
+        /**
+         * @brief Get the right motor velocity
+         * @return The current velocity of the right motor
+         */
+        int getRightCurrentVelocity();
+
+        /**
+         * @brief Get the left target motor velocity
+         * @return The target velocity of the left motor
+         */
+        int getLeftTargetVelocity();
+
+        /**
+         * @brief Get the right target motor velocity
+         * @return The target velocity of the right motor
+         */
+        int getRightTargetVelocity();
 
         /**
          * @brief initialize the pins. MUST be called before any other function and during or after the setup() function in main.cpp.

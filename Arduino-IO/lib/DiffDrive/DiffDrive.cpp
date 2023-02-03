@@ -42,3 +42,20 @@ void DiffDrive::update() {
     rightMotor.update();
 }
 
+int DiffDrive::getAcceleration() {
+    return leftMotor.getAcceleration();
+}
+
+int DiffDrive::getMaxVelocity() {
+    return leftMotor.getMaxVelocity();
+}
+
+int DiffDrive::getLeftTargetVelocity() {
+    return leftMotor.getTargetVelocity();
+}
+
+int DiffDrive::getRightTargetVelocity() {
+    return rightMotor.getTargetVelocity();
+}
+
+
