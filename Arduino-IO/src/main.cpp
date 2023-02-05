@@ -49,7 +49,7 @@ void setup() {
   // digitalWrite(13, LOW);
   // this must be called before we attach any interrupts
   wheels.setup();
-  wheels.setPID(7, 0.005, 0.01);
+  wheels.setPID(3, 1, 0.0075);
   // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);
@@ -61,17 +61,21 @@ void doSerialCommand(int * args, int args_length) {
   switch (args[0]) {
     case MOTOR_READ:
       Serial.print("!MTR,");
-      // Serial.print(String(wheels.getAcceleration()) + "," + String(wheels.getMaxVelocity()));
-      // Serial.print("," + String(wheels.getLeftTargetVelocity()) + "," + String(wheels.getRightTargetVelocity()));
       #ifdef USE_ENCODERS
-        //Serial.print("," + String(wheels.getLeftDistance()) + "," + String(wheels.getRightDistance()));
+        Serial.print(String(wheels.getLeftDistance()) + "," + String(wheels.getRightDistance()));
+      #else
+        Serial.print(String(wheels.getAcceleration()) + "," + String(wheels.getMaxVelocity()));
+        Serial.print("," + String(wheels.getLeftTargetVelocity()) + "," + String(wheels.getRightTargetVelocity()));
       #endif
       Serial.println(";");
       break;
     case MOTOR_WRITE:
       if(args_length < 3) break;
-      Serial.println("MTR");
-      //wheels.setTargetVelocity(args[1], args[2]);
+      Serial.print("Positions: ");
+      Serial.print(args[1]);
+      Serial.print(", ");
+      Serial.println(args[2]);
+      wheels.setDistances(args[1], args[2]);
       break;
     case SONAR_READ: 
       //ser.println("SONAR_READ");
@@ -89,16 +93,16 @@ void doSerialCommand(int * args, int args_length) {
 }
 
 void loop() {
-  // ser.update();
-  // if (ser.isNewData()) {
-  //   int * args = ser.getArgs();
-  //   int args_length = ser.getPopulatedArgs();
+  ser.update();
+  if (ser.isNewData()) {
+    int * args = ser.getArgs();
+    int args_length = ser.getPopulatedArgs();
 
-  //   //ser.printArgs();
+    //ser.printArgs();
 
-  //   doSerialCommand(args, args_length);
-  //   ser.clearNewData();
-  // }
+    doSerialCommand(args, args_length);
+    ser.clearNewData();
+  }
 
   // if(millis()-timer > 1000){
   //   timer = millis();

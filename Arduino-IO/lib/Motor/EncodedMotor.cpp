@@ -38,7 +38,7 @@ float EncodedMotor::getAngularVelocity() {
 }
 
 float EncodedMotor::getDistance() {
-    return encoderSteps;// * stepsToMM;
+    return encoderSteps * stepsToMM;
 }
 
 void EncodedMotor::setPID(float kp, float ki, float kd) {
@@ -88,31 +88,31 @@ void EncodedMotor::update(volatile int8_t &incriment) {
     //     this->sumError = -maxVelocity;
     // }
 
-    float velocity = proportional + integral;// + derivative;
-    if(abs(velocity) < 5){
+    float velocity = proportional + integral + derivative;
+    if(abs(error) < 5){
         velocity = 0;
+        this->sumError = 0;
     }
     
     if(past_error != 0){
-        Serial.print("Target Encoder Steps: ");
-        Serial.print(targetEncoderSteps);
-        Serial.print(" Encoder Steps: ");
-        Serial.print(encoderSteps);
-        Serial.print(" Error: ");
-        Serial.println(error);
+        // Serial.print("Target Encoder Steps: ");
+        // Serial.print(targetEncoderSteps);
+        // Serial.print(" Encoder Steps: ");
+        // Serial.print(encoderSteps);
+        // Serial.print(" Error: ");
+        // Serial.println(error);
 
-        // Serial.print(" PID Calculations: P: ");
+        // Serial.print("P: ");
         // Serial.print(proportional, 4);
         // Serial.print(" I: ");
         // Serial.print(integral, 4);
         // Serial.print(" D: ");
-        // Serial.print(derivative, 4);
+        // Serial.println(derivative, 4);
         // Serial.print(" Velocity: ");
         // Serial.println(velocity, 4);
         // Serial.print(" dt: ");
         // Serial.println(dt, 7);
     }
-    
     setVelocity(velocity);
     
 }
