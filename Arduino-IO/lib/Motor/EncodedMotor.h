@@ -1,7 +1,8 @@
 #pragma once
 #include "Motor.h"
+#include <Arduino.h>
 
-class EncodedMotor : public Motor {
+class EncodedMotor{
     public:
         EncodedMotor(int forwardPin, int backwardPin, int pwmPin, int encoderPinA, int encoderPinB);
         ~EncodedMotor() = default;
@@ -16,7 +17,7 @@ class EncodedMotor : public Motor {
          * @brief Get the current actual velocity of the motor in mm/s
          * @return int The velocity of the motor
          */
-        int getVelocity() override;
+        int getVelocity();
         
         /**
          * @brief Get the current actual angle of the motor
@@ -46,33 +47,39 @@ class EncodedMotor : public Motor {
          * @post The incriment will be set to 0;
          * @return None.
          */
-        void update(long *incriment);
+        void update(volatile int8_t &incriment);
+
+        /**
+         * @brief Set the target distance of the motor in mm
+         * @param targetDistance The target distance of the motor in mm
+         * @return None.
+         */
+        void setTargetDistance(float targetDistance);
 
         /**
          * @brief print out the current state of the motor
          * @return None.
          */
-        void print() override;
+        void print();
 
         /**
          * @brief Setup the motor
          * @return None.
          */
-        void setup() override;
-
+        void setup();
     
     protected:
         int encoderPinA;
         int encoderPinB;
-        long lastEncoderSteps = 0;
-        long encoderSteps = 0;
-        long targetEncoderSteps = 0;
-        long sumError = 0;
+        int lastEncoderSteps = 0;
+        int encoderSteps = 0;
+        int targetEncoderSteps = 0;
+        float sumError = 0;
         float wheelAngle = 0;
         float wheelRadius = 0.432;
-        float kp = 1;
-        float ki = 0;
-        float kd = 0;
+        float kp = 10;
+        float ki = 0.1;
+        float kd = 1;
 
         // wheel diameter is 66 mm
         // The grear ratio is 120 motor turns : 1 wheel turn
@@ -82,4 +89,20 @@ class EncodedMotor : public Motor {
         // 207.345/960 = 0.216 mm per step
         float stepsToMM = 0.432;
         float stepsPerRevolution = 8*120;
+
+        int target_velocity = 0;
+        float current_velocity = 0;
+        int maxVelocity = 100;
+        int acceleration = 150;
+        int forwardPin;
+        int backwardPin;
+        int pwmPin;
+        unsigned long lastTime = 0;
+
+        /**
+         * @brief Set the velocity of the motor
+         * @param velocity The velocity to set the motor to
+         * @return None.
+         */
+        void setVelocity(float velocity);
 };

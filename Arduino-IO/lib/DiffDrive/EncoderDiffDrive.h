@@ -1,9 +1,10 @@
 #pragma once
 
-#include "DiffDrive.h"
+//#include "DiffDrive.h"
 #include "EncodedMotor.h"
+#include <Arduino.h>
 
-class EncoderDiffDrive : public DiffDrive {
+class EncoderDiffDrive{
     public:
         /**
          * @brief Construct a new EncoderDiffDrive object
@@ -28,7 +29,7 @@ class EncoderDiffDrive : public DiffDrive {
          * @post The incriment will be set to 0;
          * @return None.
          */
-        void update(long *leftIncriment, long *rightIncriment);
+        void update(volatile int8_t &leftIncriment, volatile int8_t &rightIncriment);
 
         /**
          * @brief set the wheel radius for each motor
@@ -61,6 +62,14 @@ class EncoderDiffDrive : public DiffDrive {
          */
         float getRightDistance();
 
+        /**
+         * @brief Set the distance travelled by the left and right wheels in mm
+         * @param leftDistance The distance travelled by the left wheel in mm
+         * @param rightDistance The distance travelled by the right wheel in mm
+         * @return None.
+        */
+        void setDistances(float leftDistance, float rightDistance);
+
 
         /**
          * @ brief set PID constants for each motor
@@ -77,7 +86,12 @@ class EncoderDiffDrive : public DiffDrive {
          */
         void print();
 
+        /**
+         * @brief Setup the motors
+        */
+        void setup();
+
         protected:
-            EncodedMotor* encodedLeftMotor;
-            EncodedMotor* encodedRightMotor;
+            EncodedMotor encodedLeftMotor;
+            EncodedMotor encodedRightMotor;
 };

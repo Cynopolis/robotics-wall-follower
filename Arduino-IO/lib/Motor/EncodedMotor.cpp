@@ -1,13 +1,16 @@
 #include "EncodedMotor.h"
-#include "Arduino.h"
 
 EncodedMotor::EncodedMotor(int forwardPin, int backwardPin, int pwmPin, int encoderPinA, int encoderPinB)
-: Motor(forwardPin, backwardPin, pwmPin), encoderPinA(encoderPinA), encoderPinB(encoderPinB){}
+: forwardPin(forwardPin), backwardPin(backwardPin), pwmPin(pwmPin), encoderPinA(encoderPinA), encoderPinB(encoderPinB){}
 
 void EncodedMotor::setup() {
-    Motor::setup();
-    pinMode(encoderPinA, INPUT);
-    pinMode(encoderPinB, INPUT);
+    // set the pins as outputs:
+    pinMode(forwardPin, OUTPUT);
+    pinMode(backwardPin, OUTPUT);
+    pinMode(pwmPin, OUTPUT);
+    this->lastTime = micros();
+    pinMode(encoderPinA, INPUT_PULLUP);
+    pinMode(encoderPinB, INPUT_PULLUP);
 
 }
 
@@ -35,7 +38,7 @@ float EncodedMotor::getAngularVelocity() {
 }
 
 float EncodedMotor::getDistance() {
-    return encoderSteps * stepsToMM;
+    return encoderSteps;// * stepsToMM;
 }
 
 void EncodedMotor::setPID(float kp, float ki, float kd) {
@@ -44,30 +47,78 @@ void EncodedMotor::setPID(float kp, float ki, float kd) {
     this->kd = kd;
 }
 
-void EncodedMotor::update(long *incriment) {
-    // update the encoder count
-    this->encoderSteps += *incriment;
-    // reset the incriment to 0 since we've read from it
-    *incriment = 0;
-    float past_error = float(targetEncoderSteps - lastEncoderSteps);
-    this->lastEncoderSteps = encoderSteps;
+void EncodedMotor::update(volatile int8_t &incriment) {
+    int inc = incriment;
+    // update the current step count with the incriment
+    this->encoderSteps += inc;
+
+    // reset incriment to 0
+    incriment = 0;
+
+    // if(incriment != 0){
+    //     Serial.print("Pointer problems: ");
+    //     Serial.print(inc);
+    //     Serial.print(" Encoder Steps Fresh: ");
+    //     Serial.println(encoderSteps);
+    // }
+    
+    // calculate past error for derivative
+    float past_error = float(this->encoderSteps - this->lastEncoderSteps);
+    // update the last step count for derivative
+    this->lastEncoderSteps = this->encoderSteps;
 
     // update the timer
-    float dt = float(millis() - lastTime)*0.001;
-    lastTime = millis();
+    float dt = float(micros() - lastTime)*0.000001;
+    lastTime = micros();
 
     // update other things
-    float error = float(targetEncoderSteps - encoderSteps);
-    this->sumError += long(error);
+    float error = this->targetEncoderSteps - this->encoderSteps;
+    this->sumError += error * dt;
 
-    float velocity = kp * error + ki * sumError * dt + kd * (error - past_error) / dt;
-    
-    // if the current velocity is out of bounds, stop integral windup
-    if(abs(velocity) > maxVelocity) {
-        this->sumError -= long(error);
+    // calculate PID
+    float proportional = this->kp * error;
+    float integral = this->ki * sumError;// if the current velocity is out of bounds, stop integral windup
+    float derivative = this->kd * (error - past_error) / dt;
+
+    // prevent integral windup
+    // if(integral > maxVelocity) {
+    //     this->sumError = maxVelocity;
+    // }
+    // else{
+    //     this->sumError = -maxVelocity;
+    // }
+
+    float velocity = proportional + integral;// + derivative;
+    if(abs(velocity) < 5){
+        velocity = 0;
     }
+    
+    if(past_error != 0){
+        Serial.print("Target Encoder Steps: ");
+        Serial.print(targetEncoderSteps);
+        Serial.print(" Encoder Steps: ");
+        Serial.print(encoderSteps);
+        Serial.print(" Error: ");
+        Serial.println(error);
 
-    setVelocity(int(velocity));
+        // Serial.print(" PID Calculations: P: ");
+        // Serial.print(proportional, 4);
+        // Serial.print(" I: ");
+        // Serial.print(integral, 4);
+        // Serial.print(" D: ");
+        // Serial.print(derivative, 4);
+        // Serial.print(" Velocity: ");
+        // Serial.println(velocity, 4);
+        // Serial.print(" dt: ");
+        // Serial.println(dt, 7);
+    }
+    
+    setVelocity(velocity);
+    
+}
+
+void EncodedMotor::setTargetDistance(float targetDistance) {
+    this->targetEncoderSteps = long(targetDistance / stepsToMM);
 }
 
 void EncodedMotor::print() {
@@ -91,5 +142,34 @@ void EncodedMotor::print() {
     Serial.print(ki);
     Serial.print(" Kd: ");
     Serial.println(kd);
+}
+
+void EncodedMotor::setVelocity(float velocity){
+    // make sure the requested velocity is within the set bounds
+    if (abs(velocity - maxVelocity) < 0.1 ) {
+        velocity = maxVelocity;
+    }
+    else if (velocity < -maxVelocity) {
+        velocity = -maxVelocity;
+    }
+    // set the new motor direction based on the sign of the velocity
+    if (velocity > 0) {
+        digitalWrite(forwardPin, HIGH);
+        digitalWrite(backwardPin, LOW);
+    }
+    else if (velocity < 0) {
+        digitalWrite(forwardPin, LOW);
+        digitalWrite(backwardPin, HIGH);
+    }
+    else {
+        digitalWrite(forwardPin, LOW);
+        digitalWrite(backwardPin, LOW);
+    }
+    // set the current velocity to the requested velocity
+    this->current_velocity = velocity;
+    // map the velocity to the analog range of the PWM pin
+    velocity = map(abs(velocity), 0, maxVelocity, 0, 255);
+    // write the new velocity to the PWM pin
+    analogWrite(pwmPin, velocity);
 }
 

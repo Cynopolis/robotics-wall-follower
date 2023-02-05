@@ -1,6 +1,8 @@
 #pragma once
 #define USE_ENCODERS //uncomment this line to use encoders
 
+#define debug_pin 13
+
 // define serial
 #define serial_baud 115200
 
