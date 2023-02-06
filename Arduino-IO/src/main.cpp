@@ -49,7 +49,7 @@ void setup() {
   // digitalWrite(13, LOW);
   // this must be called before we attach any interrupts
   wheels.setup();
-  wheels.setPID(3, 1, 0.0075);
+  wheels.setPID(10.00, 0.50, 0.35);
   // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);

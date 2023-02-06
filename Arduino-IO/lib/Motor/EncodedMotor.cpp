@@ -48,22 +48,13 @@ void EncodedMotor::setPID(float kp, float ki, float kd) {
 }
 
 void EncodedMotor::update(volatile int8_t &incriment) {
-    int inc = incriment;
     // update the current step count with the incriment
-    this->encoderSteps += inc;
-
+    this->encoderSteps += incriment;
     // reset incriment to 0
     incriment = 0;
-
-    // if(incriment != 0){
-    //     Serial.print("Pointer problems: ");
-    //     Serial.print(inc);
-    //     Serial.print(" Encoder Steps Fresh: ");
-    //     Serial.println(encoderSteps);
-    // }
     
     // calculate past error for derivative
-    float past_error = float(this->encoderSteps - this->lastEncoderSteps);
+    float past_error = this->targetEncoderSteps - this->lastEncoderSteps;
     // update the last step count for derivative
     this->lastEncoderSteps = this->encoderSteps;
 
@@ -79,21 +70,13 @@ void EncodedMotor::update(volatile int8_t &incriment) {
     float proportional = this->kp * error;
     float integral = this->ki * sumError;// if the current velocity is out of bounds, stop integral windup
     float derivative = this->kd * (error - past_error) / dt;
-
-    // prevent integral windup
-    // if(integral > maxVelocity) {
-    //     this->sumError = maxVelocity;
-    // }
-    // else{
-    //     this->sumError = -maxVelocity;
-    // }
-
     float velocity = proportional + integral + derivative;
+
     if(abs(error) < 5){
         velocity = 0;
         this->sumError = 0;
     }
-    
+
     if(past_error != 0){
         // Serial.print("Target Encoder Steps: ");
         // Serial.print(targetEncoderSteps);
