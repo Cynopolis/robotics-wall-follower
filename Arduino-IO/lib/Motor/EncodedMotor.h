@@ -93,7 +93,7 @@ class EncodedMotor{
         int target_velocity = 0;
         float current_velocity = 0;
         int maxVelocity = 100;
-        int acceleration = 150;
+        float acceleration = 0.01;
         int forwardPin;
         int backwardPin;
         int pwmPin;
@@ -105,4 +105,11 @@ class EncodedMotor{
          * @return None.
          */
         void setVelocity(float velocity);
+
+        /**
+         * @brief Accelerate the motor gradually to the target velocity
+         * @return None.
+         * @post The motor velocity will increase or decrease.
+         */
+        void accelerate(float dt);
 };

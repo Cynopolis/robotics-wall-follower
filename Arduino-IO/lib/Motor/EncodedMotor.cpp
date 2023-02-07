@@ -71,7 +71,6 @@ void EncodedMotor::update(volatile int8_t &incriment) {
     float integral = this->ki * sumError;// if the current velocity is out of bounds, stop integral windup
     float derivative = this->kd * (error - past_error) / dt;
     float velocity = proportional + integral + derivative;
-
     if(abs(error) < 5){
         velocity = 0;
         this->sumError = 0;
@@ -96,8 +95,31 @@ void EncodedMotor::update(volatile int8_t &incriment) {
         // Serial.print(" dt: ");
         // Serial.println(dt, 7);
     }
-    setVelocity(velocity);
+    this->target_velocity = velocity;
+    accelerate(dt);
+    // setVelocity(velocity);
     
+}
+
+void EncodedMotor::accelerate(float dt){
+    // incriment the velocity based on the acceleration and dt
+    dt *= 1000000;
+    float a = acceleration*dt;
+    float diff = target_velocity - this->current_velocity;
+    if(abs(diff) < a){
+        this->current_velocity = target_velocity;
+        setVelocity(this->current_velocity);
+        return;
+    }
+    else if(diff > 0){
+        this->current_velocity += a;
+    }
+    else if(diff < 0){
+        this->current_velocity -= a;
+    }
+    
+    setVelocity(this->current_velocity);
+
 }
 
 void EncodedMotor::setTargetDistance(float targetDistance) {

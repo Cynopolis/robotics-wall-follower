@@ -49,7 +49,7 @@ void setup() {
   // digitalWrite(13, LOW);
   // this must be called before we attach any interrupts
   wheels.setup();
-  wheels.setPID(10.00, 0.50, 0.35);
+  wheels.setPID(1.7,0.4,1.0);
   // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);
@@ -71,11 +71,21 @@ void doSerialCommand(int * args, int args_length) {
       break;
     case MOTOR_WRITE:
       if(args_length < 3) break;
-      Serial.print("Positions: ");
+      Serial.print("!MTR_WRT,");
       Serial.print(args[1]);
-      Serial.print(", ");
-      Serial.println(args[2]);
+      Serial.print(",");
+      Serial.print(args[2]);
       wheels.setDistances(args[1], args[2]);
+      // optionally allow resetting the distances of the wheels
+      #ifdef USE_ENCODERS
+        if (args_length >= 5){
+          Serial.print(args[3]);
+          Serial.print(",");
+          Serial.print(args[4]);
+          wheels.setDistances(args[3], args[4]);
+        }
+      #endif
+      Serial.println(";");
       break;
     case SONAR_READ: 
       //ser.println("SONAR_READ");
