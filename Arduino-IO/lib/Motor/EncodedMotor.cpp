@@ -41,7 +41,7 @@ float EncodedMotor::getDistance() {
     return encoderSteps * stepsToMM;
 }
 
-void EncodedMotor::setPID(float kp, float ki, float kd) {
+void EncodedMotor::setPID(int kp, int ki, int kd) {
     this->kp = kp;
     this->ki = ki;
     this->kd = kd;
@@ -54,23 +54,23 @@ void EncodedMotor::update(volatile int8_t &incriment) {
     incriment = 0;
     
     // calculate past error for derivative
-    float past_error = this->targetEncoderSteps - this->lastEncoderSteps;
+    long past_error = this->targetEncoderSteps - this->lastEncoderSteps;
     // update the last step count for derivative
     this->lastEncoderSteps = this->encoderSteps;
 
     // update the timer
-    float dt = float(micros() - lastTime)*0.000001;
+    long dt = micros() - lastTime; // in microseconds
     lastTime = micros();
-
+    Serial.println(dt); // print out dt
     // update other things
-    float error = this->targetEncoderSteps - this->encoderSteps;
-    this->sumError += error * dt;
+    long error = this->targetEncoderSteps - this->encoderSteps; // in encoder steps
+    this->sumError += error * dt; 
 
     // calculate PID
-    float proportional = this->kp * error;
-    float integral = this->ki * sumError;// if the current velocity is out of bounds, stop integral windup
-    float derivative = this->kd * (error - past_error) / dt;
-    float velocity = proportional + integral + derivative;
+    long proportional = this->kp * error;
+    long integral = (this->ki * sumError) / 1000000; // normalize to seconds
+    long derivative = (this->kd * (error - past_error) * 1000000) / dt; // normalize to seconds
+    long velocity = proportional + integral + derivative;
     if(abs(error) < 5){
         velocity = 0;
         this->sumError = 0;
@@ -96,8 +96,8 @@ void EncodedMotor::update(volatile int8_t &incriment) {
         // Serial.println(dt, 7);
     }
     this->target_velocity = velocity;
-    accelerate(dt);
-    // setVelocity(velocity);
+    //accelerate(dt);
+    setVelocity(velocity);
     
 }
 
@@ -151,7 +151,7 @@ void EncodedMotor::print() {
 
 void EncodedMotor::setVelocity(float velocity){
     // make sure the requested velocity is within the set bounds
-    if (abs(velocity - maxVelocity) < 0.1 ) {
+    if (velocity > maxVelocity) {
         velocity = maxVelocity;
     }
     else if (velocity < -maxVelocity) {

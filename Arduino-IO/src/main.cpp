@@ -53,7 +53,7 @@ void setup() {
   // digitalWrite(13, LOW);
   // this must be called before we attach any interrupts
   wheels.setup();
-  wheels.setPID(1.7,0.4,1.0);
+  wheels.setPID(2,0.01,0.5);
   // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);
@@ -62,7 +62,7 @@ void setup() {
   servo.write(90);
   sonar.attachServo(servo);
 
-  sonar.enableScanMode(true);
+  sonar.enableScanMode(false);
   Serial.println("Started");
   timer = millis();
 
@@ -109,7 +109,11 @@ void doSerialCommand(int * args, int args_length) {
       if(args_length < 2) break;
       sonar.enableScanMode(args[1]==1);
       sonar.setAngleIncrement(args[2]);
-      Serial.println("SNR");
+      Serial.print("SNR,");
+      Serial.print(args[1]==1);
+      Serial.print(",");
+      Serial.print(args[2]);
+      Serial.println(";");
       break;
     case IR_READ:
       Serial.println("IR_READ");
@@ -132,15 +136,10 @@ void loop() {
     ser.clearNewData();
   }
 
-  // if(millis()-timer > 1000){
-  //   timer = millis();
-  //   digitalWrite(13, !digitalRead(13));
-  // }
   #ifdef USE_ENCODERS
     wheels.update(leftEncoderCount, rightEncoderCount);
-    //delay(10);
   #else
     wheels.update();
-  sonar.update();
   #endif
+  sonar.update();
 }

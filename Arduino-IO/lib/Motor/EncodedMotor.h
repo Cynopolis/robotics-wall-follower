@@ -39,7 +39,7 @@ class EncodedMotor{
          * @pre before this function is called the first time, P = 1, I = 0, D = 0
          * @return None.
          */
-        void setPID(float kp, float ki, float kd);
+        void setPID(int kp, int ki, int kd);
 
         /**
          * @brief updates the motor's state with current sensor data
@@ -71,15 +71,15 @@ class EncodedMotor{
     protected:
         int encoderPinA;
         int encoderPinB;
-        int lastEncoderSteps = 0;
-        int encoderSteps = 0;
-        int targetEncoderSteps = 0;
-        float sumError = 0;
+        long lastEncoderSteps = 0;
+        long encoderSteps = 0;
+        long targetEncoderSteps = 0;
+        long sumError = 0;
         float wheelAngle = 0;
         float wheelRadius = 0.432;
-        float kp = 10;
-        float ki = 0.1;
-        float kd = 1;
+        int kp = 100;
+        int ki = 1;
+        int kd = 10;
 
         // wheel diameter is 66 mm
         // The grear ratio is 120 motor turns : 1 wheel turn
@@ -92,7 +92,7 @@ class EncodedMotor{
 
         int target_velocity = 0;
         float current_velocity = 0;
-        int maxVelocity = 100;
+        int maxVelocity = 255;
         float acceleration = 0.01;
         int forwardPin;
         int backwardPin;
