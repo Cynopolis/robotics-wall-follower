@@ -1,6 +1,10 @@
 #include <Arduino.h>
 #include "Pinout.h"
 #include "SerialMessage.h"
+#include "Sonar.h"
+
+Sonar sonar(trig_pin, echo_pin);
+Servo servo;
 
 volatile int8_t leftEncoderCount = 0;
 volatile int8_t rightEncoderCount = 0;
@@ -54,6 +58,14 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);
 
+  servo.attach(servo_pin);
+  servo.write(90);
+  sonar.attachServo(servo);
+
+  sonar.enableScanMode(true);
+  Serial.println("Started");
+  timer = millis();
+
 }
 
 // TODO: Finish writing this function
@@ -88,13 +100,19 @@ void doSerialCommand(int * args, int args_length) {
       Serial.println(";");
       break;
     case SONAR_READ: 
-      //ser.println("SONAR_READ");
+      Serial.print("!SNR,");
+      Serial.print(sonar.getAngleIncrement());
+      sonar.print();
+      Serial.println(";");
       break;
     case SONAR_WRITE:
+      if(args_length < 2) break;
+      sonar.enableScanMode(args[1]==1);
+      sonar.setAngleIncrement(args[2]);
       Serial.println("SNR");
       break;
     case IR_READ:
-      //ser.println("IR_READ");
+      Serial.println("IR_READ");
       break;
     default:
       Serial.println("ERR");
@@ -123,5 +141,6 @@ void loop() {
     //delay(10);
   #else
     wheels.update();
+  sonar.update();
   #endif
 }
