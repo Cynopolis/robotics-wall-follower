@@ -6,8 +6,8 @@
 Sonar sonar(trig_pin, echo_pin);
 Servo servo;
 
-volatile int8_t leftEncoderCount = 0;
-volatile int8_t rightEncoderCount = 0;
+volatile int leftEncoderCount = 0;
+volatile int rightEncoderCount = 0;
 
 // Incriment / Decrement depending on encoder state during an interrupt
 void leftEncoderInc(){

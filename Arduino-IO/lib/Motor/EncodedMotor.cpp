@@ -47,7 +47,7 @@ void EncodedMotor::setPID(int kp, int ki, int kd) {
     this->kd = kd;
 }
 
-void EncodedMotor::update(volatile int8_t &incriment) {
+void EncodedMotor::update(volatile int &incriment) {
     // update the current step count with the incriment
     this->encoderSteps += incriment;
     // reset incriment to 0

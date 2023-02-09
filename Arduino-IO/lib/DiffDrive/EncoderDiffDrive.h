@@ -29,7 +29,7 @@ class EncoderDiffDrive{
          * @post The incriment will be set to 0;
          * @return None.
          */
-        void update(volatile int8_t &leftIncriment, volatile int8_t &rightIncriment);
+        void update(volatile int &leftIncriment, volatile int &rightIncriment);
 
         /**
          * @brief set the wheel radius for each motor

@@ -3,7 +3,7 @@
 EncoderDiffDrive::EncoderDiffDrive(EncodedMotor leftMotor, EncodedMotor rightMotor):
     encodedLeftMotor(leftMotor), encodedRightMotor(rightMotor){}
 
-void EncoderDiffDrive::update(volatile int8_t &leftIncriment, volatile int8_t &rightIncriment){
+void EncoderDiffDrive::update(volatile int &leftIncriment, volatile int &rightIncriment){
     // some funky pointer magic to keep things going
     this->encodedLeftMotor.update(leftIncriment);
     // this->encodedRightMotor->update(rightIncriment);
