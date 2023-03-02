@@ -6,7 +6,9 @@ EncoderDiffDrive::EncoderDiffDrive(EncodedMotor leftMotor, EncodedMotor rightMot
 void EncoderDiffDrive::update(volatile int &leftIncriment, volatile int &rightIncriment){
     // some funky pointer magic to keep things going
     this->encodedLeftMotor.update(leftIncriment);
-    // this->encodedRightMotor->update(rightIncriment);
+    this->encodedRightMotor.update(rightIncriment);
+
+    //TODO: sum velocities and update pose
 }
 
 void EncoderDiffDrive::setWheelRadius(float wheelRadius){
@@ -32,12 +34,12 @@ void EncoderDiffDrive::print(){
     this->encodedRightMotor.print();
 }
 
-float EncoderDiffDrive::getLeftDistance(){
-    return this->encodedLeftMotor.getDistance();
+float EncoderDiffDrive::getLeftVel(){
+    return this->encodedLeftMotor.getVelocity();
 }
 
-float EncoderDiffDrive::getRightDistance(){
-    return this->encodedRightMotor.getDistance();
+float EncoderDiffDrive::getRightVel(){
+    return this->encodedRightMotor.getVelocity();
 }
 
 void EncoderDiffDrive::setup(){
@@ -45,8 +47,10 @@ void EncoderDiffDrive::setup(){
     this->encodedRightMotor.setup();
 }
 
-void EncoderDiffDrive::setDistances(float leftDistance, float rightDistance){
-    this->encodedLeftMotor.setTargetDistance(leftDistance);
-    this->encodedRightMotor.setTargetDistance(rightDistance);
+void EncoderDiffDrive::setVelocity(int leftVelocity, int rightVelocity){
+    this->encodedLeftMotor.setTargetVelocity(leftVelocity);
+    this->encodedRightMotor.setTargetVelocity(rightVelocity);
 }
+
+//TODO: Impliment pose
 

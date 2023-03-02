@@ -48,22 +48,24 @@ void EncodedMotor::setPID(int kp, int ki, int kd) {
 }
 
 void EncodedMotor::update(volatile int &incriment) {
+
     // update the current step count with the incriment
+    this->lastEncoderSteps = this->encoderSteps;
     this->encoderSteps += incriment;
     // reset incriment to 0
     incriment = 0;
     
+    int velocity = this->getVelocity();
+
     // calculate past error for derivative
-    long past_error = this->targetEncoderSteps - this->lastEncoderSteps;
-    // update the last step count for derivative
-    this->lastEncoderSteps = this->encoderSteps;
+    long past_error = this->target_velocity - this->past_velocity;
 
     // update the timer
     long dt = micros() - lastTime; // in microseconds
     lastTime = micros();
-    Serial.println(dt); // print out dt
+    // Serial.println(dt); // print out dt
     // update other things
-    long error = this->targetEncoderSteps - this->encoderSteps; // in encoder steps
+    long error = this->target_velocity - velocity; // in encoder steps
     this->sumError += error * dt; 
 
     // calculate PID
@@ -101,28 +103,30 @@ void EncodedMotor::update(volatile int &incriment) {
     
 }
 
+// TODO: Change this to do something else
 void EncodedMotor::accelerate(float dt){
     // incriment the velocity based on the acceleration and dt
     dt *= 1000000;
     float a = acceleration*dt;
-    float diff = target_velocity - this->current_velocity;
+    int current_velocity = this->getVelocity();
+    float diff = target_velocity - current_velocity;
     if(abs(diff) < a){
-        this->current_velocity = target_velocity;
-        setVelocity(this->current_velocity);
+        current_velocity = target_velocity;
+        setVelocity(current_velocity);
         return;
     }
     else if(diff > 0){
-        this->current_velocity += a;
+        current_velocity += a;
     }
     else if(diff < 0){
-        this->current_velocity -= a;
+        current_velocity -= a;
     }
     
-    setVelocity(this->current_velocity);
+    setVelocity(current_velocity);
 
 }
 
-void EncodedMotor::setTargetDistance(float targetDistance) {
+void EncodedMotor::setTargetVelocity(float targetDistance) {
     this->targetEncoderSteps = long(targetDistance / stepsToMM);
 }
 
@@ -149,7 +153,7 @@ void EncodedMotor::print() {
     Serial.println(kd);
 }
 
-void EncodedMotor::setVelocity(float velocity){
+void EncodedMotor::setVelocity(int velocity){
     // make sure the requested velocity is within the set bounds
     if (velocity > maxVelocity) {
         velocity = maxVelocity;
@@ -170,8 +174,6 @@ void EncodedMotor::setVelocity(float velocity){
         digitalWrite(forwardPin, LOW);
         digitalWrite(backwardPin, LOW);
     }
-    // set the current velocity to the requested velocity
-    this->current_velocity = velocity;
     // map the velocity to the analog range of the PWM pin
     velocity = map(abs(velocity), 0, maxVelocity, 0, 255);
     // write the new velocity to the PWM pin

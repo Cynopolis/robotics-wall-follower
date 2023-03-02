@@ -14,7 +14,7 @@ class EncodedMotor{
         void setWheelRadius(float wheelRadius);
 
         /**
-         * @brief Get the current actual velocity of the motor in mm/s
+         * @brief Get the current linear velocity of the motor in mm/s
          * @return int The velocity of the motor
          */
         int getVelocity();
@@ -51,10 +51,10 @@ class EncodedMotor{
 
         /**
          * @brief Set the target distance of the motor in mm
-         * @param targetDistance The target distance of the motor in mm
+         * @param targetVel The target distance of the motor in mm
          * @return None.
          */
-        void setTargetDistance(float targetDistance);
+        void setTargetVelocity(float targetVel);
 
         /**
          * @brief print out the current state of the motor
@@ -74,6 +74,7 @@ class EncodedMotor{
         long lastEncoderSteps = 0;
         long encoderSteps = 0;
         long targetEncoderSteps = 0;
+        long lastVelocity = 0;
         long sumError = 0;
         float wheelAngle = 0;
         float wheelRadius = 0.432;
@@ -91,7 +92,7 @@ class EncodedMotor{
         float stepsPerRevolution = 8*120;
 
         int target_velocity = 0;
-        float current_velocity = 0;
+        int past_velocity = 0;
         int maxVelocity = 255;
         float acceleration = 0.01;
         int forwardPin;
@@ -104,7 +105,7 @@ class EncodedMotor{
          * @param velocity The velocity to set the motor to
          * @return None.
          */
-        void setVelocity(float velocity);
+        void setVelocity(int velocity);
 
         /**
          * @brief Accelerate the motor gradually to the target velocity

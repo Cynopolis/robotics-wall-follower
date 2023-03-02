@@ -74,7 +74,7 @@ void doSerialCommand(int * args, int args_length) {
     case MOTOR_READ:
       Serial.print("!MTR,");
       #ifdef USE_ENCODERS
-        Serial.print(String(wheels.getLeftDistance()) + "," + String(wheels.getRightDistance()));
+        Serial.print(String(wheels.getLeftVel()) + "," + String(wheels.getRightVel()));
       #else
         Serial.print(String(wheels.getAcceleration()) + "," + String(wheels.getMaxVelocity()));
         Serial.print("," + String(wheels.getLeftTargetVelocity()) + "," + String(wheels.getRightTargetVelocity()));
@@ -87,14 +87,14 @@ void doSerialCommand(int * args, int args_length) {
       Serial.print(args[1]);
       Serial.print(",");
       Serial.print(args[2]);
-      wheels.setDistances(args[1], args[2]);
+      wheels.setVelocity(args[1], args[2]);
       // optionally allow resetting the distances of the wheels
       #ifdef USE_ENCODERS
         if (args_length >= 5){
           Serial.print(args[3]);
           Serial.print(",");
           Serial.print(args[4]);
-          wheels.setDistances(args[3], args[4]);
+          wheels.setVelocity(args[3], args[4]);
         }
       #endif
       Serial.println(";");

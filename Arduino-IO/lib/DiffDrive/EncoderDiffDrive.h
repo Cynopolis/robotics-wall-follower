@@ -12,7 +12,6 @@ class EncoderDiffDrive{
          * @param rightMotor The right motor of the differential drive
          * @return None.
          */
-        // TODO: This is a question for the prof. To use Encoded motor or do I have to use Motor?
         EncoderDiffDrive(EncodedMotor leftMotor, EncodedMotor rightMotor);
         ~EncoderDiffDrive() = default;
 
@@ -51,16 +50,16 @@ class EncoderDiffDrive{
         float getRightAngularVelocity();
 
         /**
-         * @brief Get the distance travelled by the left wheel
+         * @brief Get the linear velocity of the left wheel
          * @return a float for how far the left wheel has travelled in mm.
          */
-        float getLeftDistance();
+        float getLeftVel();
 
         /**
-         * @brief Get the distance travelled by the right wheel
+         * @brief Get the linear velocity of the right wheel
          * @return a float for how far the right wheel has travelled in mm.
          */
-        float getRightDistance();
+        float getRightVel();
 
         /**
          * @brief Set the distance travelled by the left and right wheels in mm
@@ -68,8 +67,13 @@ class EncoderDiffDrive{
          * @param rightDistance The distance travelled by the right wheel in mm
          * @return None.
         */
-        void setDistances(float leftDistance, float rightDistance);
+        void setVelocity(int leftVelocity, int rightVelocity);
 
+        /**
+         * @brief Get the pose of the robot
+         * @return a float array of the pose of the robot
+         */
+        float* getPose();
 
         /**
          * @ brief set PID constants for each motor
