@@ -72,9 +72,9 @@ void EncodedMotor::update(volatile int &incriment) {
     long proportional = this->kp * error;
     long integral = (this->ki * sumError) / 1000000; // normalize to seconds
     long derivative = (this->kd * (error - past_error) * 1000000) / dt; // normalize to seconds
-    long velocity = proportional + integral + derivative;
+    long pid = proportional + integral + derivative;
     if(abs(error) < 5){
-        velocity = 0;
+        pid = 0;
         this->sumError = 0;
     }
 
@@ -97,9 +97,8 @@ void EncodedMotor::update(volatile int &incriment) {
         // Serial.print(" dt: ");
         // Serial.println(dt, 7);
     }
-    this->target_velocity = velocity;
     //accelerate(dt);
-    setVelocity(velocity);
+    setVelocity(pid);
     
 }
 
