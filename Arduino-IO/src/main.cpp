@@ -74,7 +74,9 @@ void doSerialCommand(int * args, int args_length) {
     case MOTOR_READ:
       Serial.print("!MTR,");
       #ifdef USE_ENCODERS
-        Serial.print(String(wheels.getLeftVel()) + "," + String(wheels.getRightVel()));
+        // print the pose
+        Pose pose = *(wheels.getCurrentPose());
+        Serial.print(String(pose.x) + "," + String(pose.y) + "," + String(pose.theta) + "," + String(pose.d_x) + "," + String(pose.d_y) + "," + String(pose.d_theta));
       #else
         Serial.print(String(wheels.getAcceleration()) + "," + String(wheels.getMaxVelocity()));
         Serial.print("," + String(wheels.getLeftTargetVelocity()) + "," + String(wheels.getRightTargetVelocity()));
@@ -84,20 +86,16 @@ void doSerialCommand(int * args, int args_length) {
     case MOTOR_WRITE:
       if(args_length < 3) break;
       Serial.print("!MTR_WRT,");
-      Serial.print(args[1]);
-      Serial.print(",");
-      Serial.print(args[2]);
-      wheels.setVelocity(args[1], args[2]);
-      // optionally allow resetting the distances of the wheels
-      #ifdef USE_ENCODERS
-        if (args_length >= 5){
-          Serial.print(args[3]);
-          Serial.print(",");
-          Serial.print(args[4]);
-          wheels.setVelocity(args[3], args[4]);
-        }
-      #endif
+      Serial.print(String(args[1]) + "," + String(args[2]) + "," + String(args[3]) + "," + String(args[4]) + "," + String(args[5]) + "," + String(args[6]));
       Serial.println(";");
+      // set the new target pose
+      Pose targetPose = *(wheels.getTargetPose());
+      targetPose.x = args[1];
+      targetPose.y = args[2];
+      targetPose.theta = args[3];
+      targetPose.d_x = args[4];
+      targetPose.d_y = args[5];
+      targetPose.d_theta = args[6];
       break;
     case SONAR_READ: 
       Serial.print("!SNR,");

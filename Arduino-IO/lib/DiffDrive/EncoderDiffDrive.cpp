@@ -31,12 +31,12 @@ void EncoderDiffDrive::setup(){
     this->encodedRightMotor.setup();
 }
 
-void EncoderDiffDrive::setTargetPose(Pose *targetPose){
-    this->target_pose = *targetPose;
-}
-
 Pose* EncoderDiffDrive::getCurrentPose(){
     return &this->current_pose;
+}
+
+Pose* EncoderDiffDrive::getTargetPose(){
+    return &this->target_pose;
 }
 
 void EncoderDiffDrive::updatePose(float leftVelocity, float rightVelocity){

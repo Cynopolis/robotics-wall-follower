@@ -50,16 +50,16 @@ class EncoderDiffDrive{
         void setWheelRadius(float wheelRadius);
 
         /**
-         * @brief Set the distance travelled by the left and right wheels in mm
-         * @param targetPose A pointer to the target pose of the robot
-        */
-        void setTargetPose(Pose *targetPose);
-
-        /**
          * @brief Get the pose of the robot
          * @return Pose* A pointer to the current pose of the robot
          */
         Pose* getCurrentPose();
+
+        /**
+         * @brief Get the target pose of the robot. You can use this pointer to set the target pose of the robot.
+         * @return Pose* A pointer to the target pose of the robot
+         */
+        Pose* getTargetPose();
 
         /**
          * @ brief set PID constants for each motor
