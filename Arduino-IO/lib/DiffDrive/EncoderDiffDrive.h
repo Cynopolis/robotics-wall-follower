@@ -4,6 +4,18 @@
 #include "EncodedMotor.h"
 #include <Arduino.h>
 
+// typedef struct pose
+typedef struct Pose{
+    // x and y are in mm
+    float x = 0;
+    float y = 0;
+    // theta is in radians
+    float theta = 0;
+    // d_x, d_y, and d_theta are the change in position and theta in mm/s and radians/s
+    float d_x = 0;
+    float d_y = 0;
+    float d_theta = 0;
+} Pose;
 class EncoderDiffDrive{
     public:
         /**
@@ -12,7 +24,7 @@ class EncoderDiffDrive{
          * @param rightMotor The right motor of the differential drive
          * @return None.
          */
-        EncoderDiffDrive(EncodedMotor leftMotor, EncodedMotor rightMotor);
+        EncoderDiffDrive(EncodedMotor leftMotor, EncodedMotor rightMotor, float wheelSeparation);
         ~EncoderDiffDrive() = default;
 
         /**
@@ -38,42 +50,16 @@ class EncoderDiffDrive{
         void setWheelRadius(float wheelRadius);
 
         /**
-         * @brief Get the current angular velocity for the left motor
-         * @return float The angular velocity of the left motor
-         */
-        float getLeftAngularVelocity();
-
-        /**
-         * @brief Get the current angular velocity for the right motor
-         * @return float The angular velocity of the right motor
-         */
-        float getRightAngularVelocity();
-
-        /**
-         * @brief Get the linear velocity of the left wheel
-         * @return a float for how far the left wheel has travelled in mm.
-         */
-        float getLeftVel();
-
-        /**
-         * @brief Get the linear velocity of the right wheel
-         * @return a float for how far the right wheel has travelled in mm.
-         */
-        float getRightVel();
-
-        /**
          * @brief Set the distance travelled by the left and right wheels in mm
-         * @param leftDistance The distance travelled by the left wheel in mm
-         * @param rightDistance The distance travelled by the right wheel in mm
-         * @return None.
+         * @param targetPose A pointer to the target pose of the robot
         */
-        void setVelocity(int leftVelocity, int rightVelocity);
+        void setTargetPose(Pose *targetPose);
 
         /**
          * @brief Get the pose of the robot
-         * @return a float array of the pose of the robot
+         * @return Pose* A pointer to the current pose of the robot
          */
-        float* getPose();
+        Pose* getCurrentPose();
 
         /**
          * @ brief set PID constants for each motor
@@ -96,6 +82,18 @@ class EncoderDiffDrive{
         void setup();
 
         protected:
+            /**
+             * @brief Update the pose of the robot
+             * @param leftVelocity The velocity of the left motor in mm/s
+             * @param rightVelocity The velocity of the right motor in mm/s
+             */
+            void updatePose(float leftVelocity, float rightVelocity);
+
             EncodedMotor encodedLeftMotor;
             EncodedMotor encodedRightMotor;
+
+            unsigned long lastTime = 0;
+            Pose current_pose;
+            Pose target_pose;
+            float wheelSeparation = 0;
 };

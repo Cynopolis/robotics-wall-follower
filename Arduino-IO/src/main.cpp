@@ -32,7 +32,7 @@ void rightEncoderInc(){
   #include "EncoderDiffDrive.h"
   EncodedMotor leftMotor(pinLF, pinLB, Lpwm_pin, left_encoder_pinA, left_encoder_pinB);
   EncodedMotor rightMotor(pinRF, pinRB, Rpwm_pin, right_encoder_pinA, right_encoder_pinB);
-  EncoderDiffDrive wheels(leftMotor, rightMotor);
+  EncoderDiffDrive wheels(leftMotor, rightMotor, 60); //TODO: Change this to the actual wheel separation
 #else
   #include "DiffDrive.h"
   Motor leftMotor(pinLF, pinLB, Lpwm_pin);
