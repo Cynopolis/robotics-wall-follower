@@ -2,20 +2,11 @@
 
 //#include "DiffDrive.h"
 #include "EncodedMotor.h"
+#include "Pose.h"
 #include <Arduino.h>
 
-// typedef struct pose
-typedef struct Pose{
-    // x and y are in mm
-    float x = 0;
-    float y = 0;
-    // theta is in radians
-    float theta = 0;
-    // d_x, d_y, and d_theta are the change in position and theta in mm/s and radians/s
-    float d_x = 0;
-    float d_y = 0;
-    float d_theta = 0;
-} Pose;
+// TODO: Move the control loop from EncodedMotor to here
+
 class EncoderDiffDrive{
     public:
         /**
@@ -88,6 +79,12 @@ class EncoderDiffDrive{
              * @param rightVelocity The velocity of the right motor in mm/s
              */
             void updatePose(float leftVelocity, float rightVelocity);
+
+            /**
+             * @brief Using the target pose and current pose, calculate the velocity of each motor
+             * @post The motor wheel velocities will be updated
+             */
+            void calculateMotorVelocities(unsigned long dt);
 
             EncodedMotor encodedLeftMotor;
             EncodedMotor encodedRightMotor;

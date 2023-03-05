@@ -2,6 +2,8 @@
 #include "Motor.h"
 #include <Arduino.h>
 
+// TODO: Move the control loop from here to the ENcodedDiffDrive class
+
 class EncodedMotor{
     public:
         EncodedMotor(int forwardPin, int backwardPin, int pwmPin, int encoderPinA, int encoderPinB);

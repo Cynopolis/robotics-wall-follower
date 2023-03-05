@@ -39,6 +39,7 @@ Pose* EncoderDiffDrive::getTargetPose(){
     return &this->target_pose;
 }
 
+// TODO: Verify this function
 void EncoderDiffDrive::updatePose(float leftVelocity, float rightVelocity){
     unsigned long dt = millis() - this->lastTime;
     this->lastTime = millis();
@@ -58,6 +59,22 @@ void EncoderDiffDrive::updatePose(float leftVelocity, float rightVelocity){
     current_pose.x += current_pose.d_x * dt;
     current_pose.y += current_pose.d_y * dt;
     current_pose.theta += current_pose.d_theta * dt;
+
+    this->calculateMotorVelocities(dt);
+}
+
+// TODO: Verify this function
+void EncoderDiffDrive::calculateMotorVelocities(unsigned long dt){
+    Pose dp = this->target_pose - this->current_pose;
+    Pose dpdt = dp / dt;
+
+    float vel_mag = sqrt(pow(dpdt.d_x, 2) + pow(dpdt.d_y, 2));
+
+    float leftVelocity = vel_mag - (dpdt.d_theta * this->wheelSeparation / 2);
+    float rightVelocity = vel_mag + (dpdt.d_theta * this->wheelSeparation / 2);
+
+    this->encodedLeftMotor.setTargetVelocity(leftVelocity);
+    this->encodedRightMotor.setTargetVelocity(rightVelocity);
 }
     
 
