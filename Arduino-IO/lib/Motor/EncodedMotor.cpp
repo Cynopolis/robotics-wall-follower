@@ -55,50 +55,8 @@ void EncodedMotor::update(volatile int &incriment) {
     // reset incriment to 0
     incriment = 0;
     
-    int velocity = this->getVelocity();
-
-    // calculate past error for derivative
-    long past_error = this->target_velocity - this->past_velocity;
-
-    // update the timer
-    long dt = micros() - lastTime; // in microseconds
-    lastTime = micros();
-    // Serial.println(dt); // print out dt
-    // update other things
-    long error = this->target_velocity - velocity; // in encoder steps
-    this->sumError += error * dt; 
-
-    // calculate PID
-    long proportional = this->kp * error;
-    long integral = (this->ki * sumError) / 1000000; // normalize to seconds
-    long derivative = (this->kd * (error - past_error) * 1000000) / dt; // normalize to seconds
-    long pid = proportional + integral + derivative;
-    if(abs(error) < 5){
-        pid = 0;
-        this->sumError = 0;
-    }
-
-    if(past_error != 0){
-        // Serial.print("Target Encoder Steps: ");
-        // Serial.print(targetEncoderSteps);
-        // Serial.print(" Encoder Steps: ");
-        // Serial.print(encoderSteps);
-        // Serial.print(" Error: ");
-        // Serial.println(error);
-
-        // Serial.print("P: ");
-        // Serial.print(proportional, 4);
-        // Serial.print(" I: ");
-        // Serial.print(integral, 4);
-        // Serial.print(" D: ");
-        // Serial.println(derivative, 4);
-        // Serial.print(" Velocity: ");
-        // Serial.println(velocity, 4);
-        // Serial.print(" dt: ");
-        // Serial.println(dt, 7);
-    }
-    //accelerate(dt);
-    setVelocity(pid);
+    // Bypass PID
+    this->setVelocity(this->target_velocity);
     
 }
 

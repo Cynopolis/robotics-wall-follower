@@ -69,9 +69,13 @@ void EncoderDiffDrive::calculateMotorVelocities(unsigned long dt){
     Pose dpdt = dp / dt;
 
     // TODO: Check if this is necessary
+    // TODO: Add D constant here
     dpdt.d_theta -= this->current_pose.d_theta;
     dpdt.d_x -= this->current_pose.d_x;
     dpdt.d_y -= this->current_pose.d_y;
+
+    // Add integral term
+    // TODO: Add PID constants
 
     float vel_mag = sqrt(pow(dpdt.d_x, 2) + pow(dpdt.d_y, 2));
 
