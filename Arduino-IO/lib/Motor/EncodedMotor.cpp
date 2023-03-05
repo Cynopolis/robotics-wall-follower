@@ -41,12 +41,6 @@ float EncodedMotor::getDistance() {
     return encoderSteps * stepsToMM;
 }
 
-void EncodedMotor::setPID(int kp, int ki, int kd) {
-    this->kp = kp;
-    this->ki = ki;
-    this->kd = kd;
-}
-
 void EncodedMotor::update(volatile int &incriment) {
 
     // update the current step count with the incriment

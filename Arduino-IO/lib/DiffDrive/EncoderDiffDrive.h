@@ -92,5 +92,12 @@ class EncoderDiffDrive{
             unsigned long lastTime = 0;
             Pose current_pose;
             Pose target_pose;
+            Pose sum_error = {0, 0, 0, 0, 0, 0};
+            Pose last_error;
             float wheelSeparation = 0;
+
+            float kp = 1;
+            float ki = 1;
+            float kd = 1;
+
 };

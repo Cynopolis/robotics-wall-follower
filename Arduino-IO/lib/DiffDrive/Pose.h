@@ -2,6 +2,8 @@
 
 // typedef struct pose
 typedef struct Pose{
+    Pose() : x(0), y(0), theta(0), d_x(0), d_y(0), d_theta(0) {}
+    Pose(float x, float y, float theta, float d_x, float d_y, float d_theta) : x(x), y(y), theta(theta), d_x(d_x), d_y(d_y), d_theta(d_theta) {}
     // x and y are in mm
     float x = 0;
     float y = 0;

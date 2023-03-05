@@ -34,16 +34,6 @@ class EncodedMotor{
         float getDistance();
 
         /**
-         * @brief Set the PID constants of the motor
-         * @param kp The proportional constant
-         * @param ki The integral constant
-         * @param kd The derivative constant
-         * @pre before this function is called the first time, P = 1, I = 0, D = 0
-         * @return None.
-         */
-        void setPID(int kp, int ki, int kd);
-
-        /**
          * @brief updates the motor's state with current sensor data
          * @param incriment The number of steps to incriment the encoder count by. (positive or negative)
          * @post The incriment will be set to 0;

@@ -17,8 +17,9 @@ void EncoderDiffDrive::setWheelRadius(float wheelRadius){
 
 
 void EncoderDiffDrive::setPID(float kp, float ki, float kd){
-    this->encodedLeftMotor.setPID(kp, ki, kd);
-    this->encodedRightMotor.setPID(kp, ki, kd);
+    this->kp = kp;
+    this->ki = ki;
+    this->kd = kd;
 }
 
 void EncoderDiffDrive::print(){
@@ -65,22 +66,28 @@ void EncoderDiffDrive::updatePose(float leftVelocity, float rightVelocity){
 
 // TODO: Verify this function
 void EncoderDiffDrive::calculateMotorVelocities(unsigned long dt){
-    Pose dp = this->target_pose - this->current_pose;
-    Pose dpdt = dp / dt;
+    // difference
+    Pose error = this->target_pose - this->current_pose;
 
-    // TODO: Check if this is necessary
-    // TODO: Add D constant here
-    dpdt.d_theta -= this->current_pose.d_theta;
-    dpdt.d_x -= this->current_pose.d_x;
-    dpdt.d_y -= this->current_pose.d_y;
+    // integral
+    this->sum_error = this->sum_error + (error * dt);
 
-    // Add integral term
-    // TODO: Add PID constants
+    // derivative
+    Pose dedt = (error - this->last_error) / dt;
+    this->last_error = error;
+    
 
-    float vel_mag = sqrt(pow(dpdt.d_x, 2) + pow(dpdt.d_y, 2));
+    // TODO: Check if the signs are correct on the derivative term
+    dedt.d_theta -= this->current_pose.d_theta;
+    dedt.d_x -= this->current_pose.d_x;
+    dedt.d_y -= this->current_pose.d_y;
 
-    float leftVelocity = vel_mag - (dpdt.d_theta * this->wheelSeparation / 2);
-    float rightVelocity = vel_mag + (dpdt.d_theta * this->wheelSeparation / 2);
+    Pose pid = (error * this->kp) + (this->sum_error * this->ki) + (dedt * this->kd);
+
+    float vel_mag = sqrt(pow(pid.d_x, 2) + pow(pid.d_y, 2));
+
+    float leftVelocity = vel_mag - (pid.d_theta * this->wheelSeparation / 2);
+    float rightVelocity = vel_mag + (pid.d_theta * this->wheelSeparation / 2);
 
     this->encodedLeftMotor.setTargetVelocity(leftVelocity);
     this->encodedRightMotor.setTargetVelocity(rightVelocity);
