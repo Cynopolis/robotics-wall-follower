@@ -35,10 +35,10 @@ class EncodedMotor{
 
         /**
          * @brief Set the target distance of the motor in mm
-         * @param targetVel The target distance of the motor in mm
+         * @param targetVel The target velocity of the motor from 0-255 (unitless)
          * @return None.
          */
-        void setTargetVelocity(float targetVel);
+        void setTargetVelocity(int targetVelocity);
 
         /**
          * @brief print out the current state of the motor

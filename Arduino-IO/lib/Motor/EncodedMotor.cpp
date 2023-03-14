@@ -49,7 +49,7 @@ void EncodedMotor::update(volatile int &incriment) {
     
 }
 
-void EncodedMotor::setTargetVelocity(float targetVelocity) {
+void EncodedMotor::setTargetVelocity(int targetVelocity) {
     this->target_velocity = targetVelocity;
 }
 

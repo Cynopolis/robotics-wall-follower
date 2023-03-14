@@ -73,7 +73,7 @@ typedef struct Pose{
         return newPose;
     }
 
-    float get(uint8_t index){
+    const float get(uint8_t index){
         switch(index){
             case 0:
                 return this->x;
@@ -90,5 +90,45 @@ typedef struct Pose{
             default:
                 return 0;
         }
+    }
+
+    void set(uint8_t index, float value){
+        switch(index){
+            case 0:
+                this->x = value;
+                break;
+            case 1:
+                this->y = value;
+                break;
+            case 2:
+                this->theta = value;
+                break;
+            case 3:
+                this->d_x = value;
+                break;
+            case 4:
+                this->d_y = value;
+                break;
+            case 5:
+                this->d_theta = value;
+                break;
+            default:
+                break;
+        }
+    }
+
+    const void print(){
+        Serial.print("x: ");
+        Serial.print(this->x);
+        Serial.print(" y: ");
+        Serial.print(this->y);
+        Serial.print(" theta: ");
+        Serial.print(this->theta);
+        Serial.print(" d_x: ");
+        Serial.print(this->d_x);
+        Serial.print(" d_y: ");
+        Serial.print(this->d_y);
+        Serial.print(" d_theta: ");
+        Serial.println(this->d_theta);
     }
 } Pose;

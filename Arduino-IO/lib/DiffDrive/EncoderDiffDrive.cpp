@@ -64,8 +64,8 @@ Pose* EncoderDiffDrive::getTargetPose(){
 
 // TODO: Verify this function
 void EncoderDiffDrive::updatePose(float leftVelocity, float rightVelocity){
-    unsigned long dt = millis() - this->lastTime;
-    this->lastTime = millis();
+    unsigned long dt = (micros() - this->lastTime) / 1000000;
+    this->lastTime = micros();
     
     // calculate the angle velocity
     // TODO: check if this is degrees or radians
@@ -105,12 +105,14 @@ void EncoderDiffDrive::calculateMotorVelocities(unsigned long dt){
     // dedt.d_y -= this->current_pose.d_y;
 
     Pose pid = (error * this->kp);// + (this->sum_error * this->ki);// + (dedt * this->kd);
+    
+    // pid.print();
 
-    float vel_mag = sqrt(pow(pid.x, 2) + pow(pid.y, 2));
+    float vel_mag = sqrt(pid.x * pid.x + pid.y * pid.y);
 
-    float leftVelocity = vel_mag - (pid.theta * this->wheelSeparation / 2);
-    float rightVelocity = vel_mag + (pid.theta * this->wheelSeparation / 2);
-
+    float leftVelocity = vel_mag - (pid.theta * this->wheelSeparation * 0.5);
+    float rightVelocity = vel_mag + (pid.theta * this->wheelSeparation * 0.5);
+    
     this->encodedLeftMotor.setTargetVelocity(leftVelocity);
     this->encodedRightMotor.setTargetVelocity(rightVelocity);
 }
