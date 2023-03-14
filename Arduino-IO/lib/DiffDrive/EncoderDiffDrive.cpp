@@ -3,7 +3,7 @@
 EncoderDiffDrive::EncoderDiffDrive(EncodedMotor leftMotor, EncodedMotor rightMotor, float wheelSeparation):
     encodedLeftMotor(leftMotor), encodedRightMotor(rightMotor), wheelSeparation(wheelSeparation){}
 
-void EncoderDiffDrive::update(volatile int &leftIncriment, volatile int &rightIncriment){
+void EncoderDiffDrive::update(volatile int32_t &leftIncriment, volatile int32_t &rightIncriment){
     this->encodedLeftMotor.update(leftIncriment);
     this->encodedRightMotor.update(rightIncriment);
 
@@ -64,47 +64,61 @@ Pose* EncoderDiffDrive::getTargetPose(){
 
 // TODO: Verify this function
 void EncoderDiffDrive::updatePose(float leftVelocity, float rightVelocity){
-    unsigned long dt = (micros() - this->lastTime) / 1000000;
+    if(abs(leftVelocity) > 1 || abs(rightVelocity) > 1){
+        Serial.print("Left Velocity: ");
+        Serial.print(leftVelocity);
+        Serial.print(" Right Velocity: ");
+        Serial.println(rightVelocity);
+    }
+
+    float dt = float(micros() - this->lastTime) / 1000000;
     this->lastTime = micros();
+
     
-    // calculate the angle velocity
-    // TODO: check if this is degrees or radians
-    this->current_pose.d_theta = (rightVelocity - leftVelocity) / this->wheelSeparation;
+    // calculate the angle velocity in radians
+    this->current_pose.d_theta = 2 * PI * (rightVelocity - leftVelocity) / (this->wheelSeparation);
+    current_pose.theta += current_pose.d_theta;
 
     // calculate the linear velocity
-    float linearVelocity = (rightVelocity + leftVelocity) / 2;
+    float linearVelocity = (rightVelocity + leftVelocity) / (2);
 
     // calculate the x and y angle velocity
-    this->current_pose.d_x = linearVelocity * cos(this->current_pose.d_theta);
-    this->current_pose.d_y = linearVelocity * sin(this->current_pose.d_theta);
+    this->current_pose.d_x = linearVelocity * cos(this->current_pose.theta);
+    this->current_pose.d_y = linearVelocity * sin(this->current_pose.theta);
 
     // calculate the change in x, y, and theta
-    current_pose.x += current_pose.d_x * dt;
-    current_pose.y += current_pose.d_y * dt;
-    current_pose.theta += current_pose.d_theta * dt;
+    current_pose.x += current_pose.d_x;
+    current_pose.y += current_pose.d_y;
+
+    while(current_pose.theta > 2 * PI){
+        current_pose.theta -= 2 * PI;
+    }
+    while(current_pose.theta < 0){
+        current_pose.theta += 2 * PI;
+    }
 
     this->calculateMotorVelocities(dt);
 }
 
 // TODO: Verify this function
-void EncoderDiffDrive::calculateMotorVelocities(unsigned long dt){
+void EncoderDiffDrive::calculateMotorVelocities(float dt){
     // difference
     Pose error = this->target_pose - this->current_pose;
 
     // integral
-    // this->sum_error = this->sum_error + (error * dt);
+    this->sum_error = this->sum_error + (error * dt);
 
-    // // derivative
-    // Pose dedt = (error - this->last_error) / dt;
-    // this->last_error = error;
+    // derivative
+    Pose dedt = (error - this->last_error) / dt;
+    this->last_error = error;
     
 
-    // // TODO: Check if the signs are correct on the derivative term
+    // TODO: Check if the signs are correct on the derivative term
     // dedt.d_theta -= this->current_pose.d_theta;
     // dedt.d_x -= this->current_pose.d_x;
     // dedt.d_y -= this->current_pose.d_y;
 
-    Pose pid = (error * this->kp);// + (this->sum_error * this->ki);// + (dedt * this->kd);
+    Pose pid = (error * this->kp) + (this->sum_error * this->ki) + (dedt * this->kd);
     
     // pid.print();
 

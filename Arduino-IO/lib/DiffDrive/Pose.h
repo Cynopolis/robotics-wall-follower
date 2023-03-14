@@ -119,11 +119,11 @@ typedef struct Pose{
 
     const void print(){
         Serial.print("x: ");
-        Serial.print(this->x);
+        Serial.print(this->x,5);
         Serial.print(" y: ");
-        Serial.print(this->y);
+        Serial.print(this->y,5);
         Serial.print(" theta: ");
-        Serial.print(this->theta);
+        Serial.print(this->theta,5);
         Serial.print(" d_x: ");
         Serial.print(this->d_x);
         Serial.print(" d_y: ");

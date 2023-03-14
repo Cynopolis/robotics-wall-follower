@@ -31,7 +31,7 @@ class EncoderDiffDrive{
          * @post The incriment will be set to 0;
          * @return None.
          */
-        void update(volatile int &leftIncriment, volatile int &rightIncriment);
+        void update(volatile int32_t &leftIncriment, volatile int32_t &rightIncriment);
 
         /**
          * @brief set the wheel radius for each motor
@@ -84,7 +84,7 @@ class EncoderDiffDrive{
              * @brief Using the target pose and current pose, calculate the velocity of each motor
              * @post The motor wheel velocities will be updated
              */
-            void calculateMotorVelocities(unsigned long dt);
+            void calculateMotorVelocities(float dt);
 
             EncodedMotor encodedLeftMotor;
             EncodedMotor encodedRightMotor;

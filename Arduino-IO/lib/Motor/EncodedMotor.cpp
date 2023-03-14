@@ -26,23 +26,26 @@ void EncodedMotor::setWheelRadius(float wheelRadius) {
 }
 
 float EncodedMotor::getVelocity() {
-    float diffDist = float(encoderSteps - lastEncoderSteps) * stepsToMM;
-    float diffTime = float(micros() - lastTime);
-    return 1000000 * diffDist / diffTime; // we multiply by 1000000 here to offset the fact that the time measured is in us.
-    //Multiplying is faster than dividing.
+    return this->currentVelocity;
 }
 
 float EncodedMotor::getDistance() {
     return encoderSteps * stepsToMM;
 }
 
-void EncodedMotor::update(volatile int &incriment) {
+void EncodedMotor::update(volatile int32_t &incriment) {
 
     // update the current step count with the incriment
     this->lastEncoderSteps = this->encoderSteps;
     this->encoderSteps += incriment;
     // reset incriment to 0
     incriment = 0;
+
+    //float dt = (micros() - this->lastTime) / 1000000.0;
+    float distance = (this->encoderSteps - this->lastEncoderSteps) * stepsToMM;
+    this->currentVelocity = distance;
+
+    lastTime = micros();
     
     // Bypass PID
     this->setVelocity(this->target_velocity);
@@ -96,7 +99,7 @@ void EncodedMotor::setVelocity(int velocity){
         digitalWrite(backwardPin, LOW);
     }
     // map the velocity to the analog range of the PWM pin
-    velocity = map(abs(velocity), 0, maxVelocity, 0, 255);
+    velocity = map(abs(velocity), 0, maxVelocity, 0, 100);
     // write the new velocity to the PWM pin
     analogWrite(pwmPin, velocity);
 }

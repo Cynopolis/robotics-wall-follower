@@ -6,16 +6,16 @@
 Sonar sonar(trig_pin, echo_pin);
 Servo servo;
 
-volatile int leftEncoderCount = 0;
-volatile int rightEncoderCount = 0;
+volatile int32_t leftEncoderCount = 0;
+volatile int32_t rightEncoderCount = 0;
 
 // Incriment / Decrement depending on encoder state during an interrupt
 void leftEncoderInc(){
   if (digitalRead(left_encoder_pinA) == digitalRead(left_encoder_pinB)) {
-    leftEncoderCount--;
+    leftEncoderCount++;
     return;
   }
-  leftEncoderCount++;
+  leftEncoderCount--;
   
 }
 
@@ -49,7 +49,7 @@ void setup() {
 
 
   wheels.setup();
-  wheels.setPID(2,0.01,0.5);
+  wheels.setPID(0.1,0.001,0.001);
   // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);
@@ -71,13 +71,13 @@ void doSerialCommand(int * args, int args_length) {
         // print the current pose
         Pose *pose = (wheels.getCurrentPose());
         for(auto i = 0; i < 6; i++) {
-          Serial.print(pose->get(i));
+          Serial.print(pose->get(i),4);
           Serial.print(",");
         }
         // print the target pose
         pose = (wheels.getTargetPose());
         for(auto i = 0; i < 6; i++) {
-          Serial.print(pose->get(i));
+          Serial.print(pose->get(i),4);
           Serial.print(",");
         }
 
@@ -101,9 +101,6 @@ void doSerialCommand(int * args, int args_length) {
       targetPose->x = args[1];
       targetPose->y = args[2];
       targetPose->theta = args[3];
-      targetPose->d_x = args[4];
-      targetPose->d_y = args[5];
-      targetPose->d_theta = args[6];
       wheels.print();
       break;
     }
