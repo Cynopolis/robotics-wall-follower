@@ -72,4 +72,23 @@ typedef struct Pose{
         newPose.d_theta = this->d_theta / constant;
         return newPose;
     }
+
+    float get(uint8_t index){
+        switch(index){
+            case 0:
+                return this->x;
+            case 1:
+                return this->y;
+            case 2:
+                return this->theta;
+            case 3:
+                return this->d_x;
+            case 4:
+                return this->d_y;
+            case 5:
+                return this->d_theta;
+            default:
+                return 0;
+        }
+    }
 } Pose;

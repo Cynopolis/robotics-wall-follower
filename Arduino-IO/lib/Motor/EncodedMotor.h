@@ -2,11 +2,9 @@
 #include "Motor.h"
 #include <Arduino.h>
 
-// TODO: Move the control loop from here to the ENcodedDiffDrive class
-
 class EncodedMotor{
     public:
-        EncodedMotor(int forwardPin, int backwardPin, int pwmPin, int encoderPinA, int encoderPinB);
+        EncodedMotor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, uint8_t encoderPinA, uint8_t encoderPinB);
         ~EncodedMotor() = default;
         
         /**
@@ -19,13 +17,7 @@ class EncodedMotor{
          * @brief Get the current linear velocity of the motor in mm/s
          * @return int The velocity of the motor
          */
-        int getVelocity();
-        
-        /**
-         * @brief Get the current actual angle of the motor
-         * @return float The angle of the motor
-         */
-        float getAngularVelocity();
+        float getVelocity();
 
         /**
          * @brief Get the current actual distance traveled by the motor in mm
@@ -61,8 +53,13 @@ class EncodedMotor{
         void setup();
     
     protected:
-        int encoderPinA;
-        int encoderPinB;
+        // pins
+        uint8_t forwardPin;
+        uint8_t backwardPin;
+        uint8_t pwmPin;
+        uint8_t encoderPinA;
+        uint8_t encoderPinB;
+
         long lastEncoderSteps = 0;
         long encoderSteps = 0;
         long targetEncoderSteps = 0;
@@ -81,15 +78,13 @@ class EncodedMotor{
         // 66*PI = 207.345 mm per wheel revolution
         // 207.345/960 = 0.216 mm per step
         float stepsToMM = 0.432;
-        float stepsPerRevolution = 8*120;
+        static constexpr float stepsPerRevolution = 8*120; // 8*120 = 960;
 
         int target_velocity = 0;
         int past_velocity = 0;
         int maxVelocity = 255;
         float acceleration = 0.01;
-        int forwardPin;
-        int backwardPin;
-        int pwmPin;
+
         unsigned long lastTime = 0;
 
         /**
@@ -98,11 +93,4 @@ class EncodedMotor{
          * @return None.
          */
         void setVelocity(int velocity);
-
-        /**
-         * @brief Accelerate the motor gradually to the target velocity
-         * @return None.
-         * @post The motor velocity will increase or decrease.
-         */
-        void accelerate(float dt);
 };

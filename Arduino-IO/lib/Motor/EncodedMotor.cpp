@@ -1,6 +1,6 @@
 #include "EncodedMotor.h"
 
-EncodedMotor::EncodedMotor(int forwardPin, int backwardPin, int pwmPin, int encoderPinA, int encoderPinB)
+EncodedMotor::EncodedMotor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, uint8_t encoderPinA, uint8_t encoderPinB)
 : forwardPin(forwardPin), backwardPin(backwardPin), pwmPin(pwmPin), encoderPinA(encoderPinA), encoderPinB(encoderPinB){}
 
 void EncodedMotor::setup() {
@@ -25,16 +25,11 @@ void EncodedMotor::setWheelRadius(float wheelRadius) {
     this->stepsToMM = (wheelRadius * PI) / stepsPerRevolution;
 }
 
-int EncodedMotor::getVelocity() {
+float EncodedMotor::getVelocity() {
     float diffDist = float(encoderSteps - lastEncoderSteps) * stepsToMM;
-    float diffTime = float(millis() - lastTime);
-    return int(diffDist / diffTime);
-}
-
-float EncodedMotor::getAngularVelocity() {
-    float diffAngle = 2*PI*float(encoderSteps - lastEncoderSteps) / stepsPerRevolution;
-    float diffTime = float(millis() - lastTime);
-    return diffAngle / diffTime;
+    float diffTime = float(micros() - lastTime);
+    return 1000000 * diffDist / diffTime; // we multiply by 1000000 here to offset the fact that the time measured is in us.
+    //Multiplying is faster than dividing.
 }
 
 float EncodedMotor::getDistance() {
@@ -54,31 +49,8 @@ void EncodedMotor::update(volatile int &incriment) {
     
 }
 
-// TODO: Change this to do something else
-void EncodedMotor::accelerate(float dt){
-    // incriment the velocity based on the acceleration and dt
-    dt *= 1000000;
-    float a = acceleration*dt;
-    int current_velocity = this->getVelocity();
-    float diff = target_velocity - current_velocity;
-    if(abs(diff) < a){
-        current_velocity = target_velocity;
-        setVelocity(current_velocity);
-        return;
-    }
-    else if(diff > 0){
-        current_velocity += a;
-    }
-    else if(diff < 0){
-        current_velocity -= a;
-    }
-    
-    setVelocity(current_velocity);
-
-}
-
-void EncodedMotor::setTargetVelocity(float targetDistance) {
-    this->targetEncoderSteps = long(targetDistance / stepsToMM);
+void EncodedMotor::setTargetVelocity(float targetVelocity) {
+    this->target_velocity = targetVelocity;
 }
 
 void EncodedMotor::print() {
@@ -88,8 +60,6 @@ void EncodedMotor::print() {
     Serial.print(targetEncoderSteps);
     Serial.print(" Velocity: ");
     Serial.print(getVelocity());
-    Serial.print(" Angular Velocity: ");
-    Serial.print(getAngularVelocity());
     Serial.print(" Distance: ");
     Serial.print(getDistance());
     Serial.print(" Wheel Angle: ");

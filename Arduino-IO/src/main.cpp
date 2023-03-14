@@ -39,19 +39,15 @@ void rightEncoderInc(){
   Motor rightMotor(pinRF, pinRB, Rpwm_pin);
   DiffDrive wheels(leftMotor, rightMotor);
 #endif
+
+// Object to handle serial communication
 SerialMessage ser;
 
-unsigned long timer = 0;
 void setup() {
   Serial.begin(serial_baud);
-  timer = millis();
   Serial.println("Starting up...");
-  pinMode(debug_pin, OUTPUT);
 
-  // digitalWrite(13, HIGH);
-  // delay(100);
-  // digitalWrite(13, LOW);
-  // this must be called before we attach any interrupts
+
   wheels.setup();
   wheels.setPID(2,0.01,0.5);
   // attach the interrupts
@@ -64,46 +60,61 @@ void setup() {
 
   sonar.enableScanMode(false);
   Serial.println("Started");
-  timer = millis();
-
 }
 
 // TODO: Finish writing this function
 void doSerialCommand(int * args, int args_length) {
   switch (args[0]) {
-    case MOTOR_READ:
+    case MOTOR_READ:{
       Serial.print("!MTR,");
       #ifdef USE_ENCODERS
-        // print the pose
-        Pose pose = *(wheels.getCurrentPose());
-        Serial.print(String(pose.x) + "," + String(pose.y) + "," + String(pose.theta) + "," + String(pose.d_x) + "," + String(pose.d_y) + "," + String(pose.d_theta));
+        // print the current pose
+        Pose *pose = (wheels.getCurrentPose());
+        for(auto i = 0; i < 6; i++) {
+          Serial.print(pose->get(i));
+          Serial.print(",");
+        }
+        // print the target pose
+        pose = (wheels.getTargetPose());
+        for(auto i = 0; i < 6; i++) {
+          Serial.print(pose->get(i));
+          Serial.print(",");
+        }
+
       #else
         Serial.print(String(wheels.getAcceleration()) + "," + String(wheels.getMaxVelocity()));
         Serial.print("," + String(wheels.getLeftTargetVelocity()) + "," + String(wheels.getRightTargetVelocity()));
       #endif
       Serial.println(";");
       break;
-    case MOTOR_WRITE:
+    }
+    case MOTOR_WRITE:{
       if(args_length < 3) break;
       Serial.print("!MTR_WRT,");
-      Serial.print(String(args[1]) + "," + String(args[2]) + "," + String(args[3]) + "," + String(args[4]) + "," + String(args[5]) + "," + String(args[6]));
+      for(int i = 1; i < args_length; i++) {
+        Serial.print(args[i]);
+        Serial.print(",");
+      }
       Serial.println(";");
       // set the new target pose
-      Pose targetPose = *(wheels.getTargetPose());
-      targetPose.x = args[1];
-      targetPose.y = args[2];
-      targetPose.theta = args[3];
-      targetPose.d_x = args[4];
-      targetPose.d_y = args[5];
-      targetPose.d_theta = args[6];
+      Pose *targetPose = (wheels.getTargetPose());
+      targetPose->x = args[1];
+      targetPose->y = args[2];
+      targetPose->theta = args[3];
+      targetPose->d_x = args[4];
+      targetPose->d_y = args[5];
+      targetPose->d_theta = args[6];
+      wheels.print();
       break;
-    case SONAR_READ: 
+    }
+    case SONAR_READ:{ 
       Serial.print("!SNR,");
       Serial.print(sonar.getAngleIncrement());
       sonar.print();
       Serial.println(";");
       break;
-    case SONAR_WRITE:
+    }
+    case SONAR_WRITE:{
       if(args_length < 2) break;
       sonar.enableScanMode(args[1]==1);
       sonar.setAngleIncrement(args[2]);
@@ -113,14 +124,19 @@ void doSerialCommand(int * args, int args_length) {
       Serial.print(args[2]);
       Serial.println(";");
       break;
-    case IR_READ:
+    }
+    case IR_READ:{
       Serial.println("IR_READ");
       break;
-    default:
+    }
+    default:{
       Serial.println("ERR");
       break;
+    }
   }
 }
+
+unsigned long timer = 0;
 
 void loop() {
   ser.update();
@@ -128,7 +144,7 @@ void loop() {
     int * args = ser.getArgs();
     int args_length = ser.getPopulatedArgs();
 
-    //ser.printArgs();
+    // ser.printArgs();
 
     doSerialCommand(args, args_length);
     ser.clearNewData();
@@ -140,4 +156,9 @@ void loop() {
     wheels.update();
   #endif
   sonar.update();
+
+  if(millis() - timer > 5000){
+    Serial.println("Still connected");
+    timer = millis();
+  }
 }
