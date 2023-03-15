@@ -44,11 +44,21 @@ void EncoderDiffDrive::setup() {
 void EncoderDiffDrive::update(volatile long &leftIncriment, volatile long &rightIncriment) {
     // Calculate elapsed time since last update
     unsigned long now = millis();
-    float dt = (now - lastUpdateTime);
+    float dt = float(now - lastUpdateTime);
     // if the time is less than 1ms, don't update. We use 0.5 to account for rounding errors
-    if(dt < 0.5) return;
+    if(dt < 0.9) return;
     dt *= 0.001;
     lastUpdateTime = now;
+
+    if(millis() - timer > 3000) {
+        timer = millis();
+        Serial.print("Current Pose: ");
+        currentPose.print();
+        Serial.print("Target Pose: ");
+        targetPose.print();
+        Serial.print("dt: ");
+        Serial.println(dt, 5);
+    }
 
     // update the motors with the latest encoder incriment
     leftMotor.update(leftIncriment);
@@ -58,33 +68,44 @@ void EncoderDiffDrive::update(volatile long &leftIncriment, volatile long &right
     float leftVelocity = leftMotor.getVelocity();
     float rightVelocity = rightMotor.getVelocity();
     float v = (leftVelocity + rightVelocity) / 2.0;
-    float omega = (leftVelocity - rightVelocity) / wheelSeperation;
+    float d_theta = 2 * PI * (leftVelocity - rightVelocity) / wheelSeperation;
 
     // Calculate current position using current velocity and elapsed time
-    float theta = currentPose.theta + omega * dt;
-    float x = currentPose.x + v * cos(theta) * dt;
-    float y = currentPose.y + v * sin(theta) * dt;
-    Pose currentPosition(x, y, theta, 0, 0, 0);
+    float theta = currentPose.theta + d_theta * dt;
+
+    // Make sure theta is between 0 and 2*PI
+    while(theta > 2 * PI) theta -= 2 * PI;
+    while(theta < 0) theta += 2 * PI;
+
+    // update the current pose of the robot
+    currentPose.d_x = v * cos(theta);
+    currentPose.d_y = v * sin(theta);
+    currentPose.d_theta = d_theta;
+    currentPose.x = currentPose.x + currentPose.d_x * dt;
+    currentPose.y = currentPose.y + currentPose.d_y * dt;
+    currentPose.theta = theta;
+
+    if(currentPose.d_x == NAN || currentPose.d_y == NAN || currentPose.d_theta == NAN) {
+        Serial.println("NAN!!");
+        Serial.print("Current Pose: ");
+        currentPose.print();
+        delay(1000);
+    }
 
     // Calculate error between current and target pose
-    Pose error = targetPose - currentPosition;
+    Pose error = targetPose - currentPose;
+    sumError = sumError + error * dt;
 
     // calculate the desired velocity based on the error
-    float v_x = kp * error.x + ki * currentPose.d_x + kd * (error.x - currentPose.d_x) / dt;
-    float v_y = kp * error.y + ki * currentPose.d_y + kd * (error.y - currentPose.d_y) / dt;
-    float v_theta = kp * error.theta + ki * currentPose.d_theta + kd * (error.theta - currentPose.d_theta) / dt;
+    Pose v_pid = error * kp + sumError * ki + (error - pastError) * kd / dt;
+
+    pastError = error;
 
     // Calculate motor speeds based on the desired velocities
-    float leftSpeed = (v_x - v_theta * wheelSeperation / 2.0);
-    float rightSpeed = (v_x + v_theta * wheelSeperation / 2.0);
+    int leftSpeed = (v_pid.x - v_pid.theta * wheelSeperation / 2.0);
+    int rightSpeed = (v_pid.x + v_pid.theta * wheelSeperation / 2.0);
 
     // Set motor speeds
     leftMotor.setTargetVelocity(leftSpeed);
     rightMotor.setTargetVelocity(rightSpeed);
-
-    // Update current pose
-    currentPose = currentPosition;
-    currentPose.d_x = v_x;
-    currentPose.d_y = v_y;
-    currentPose.d_theta = v_theta;
 }

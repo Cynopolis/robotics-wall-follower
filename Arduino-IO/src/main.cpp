@@ -76,7 +76,7 @@ void doSerialCommand(int * args, int args_length) {
         }
         // print the target pose
         pose = (wheels.getTargetPose());
-        for(auto i = 0; i < 6; i++) {
+        for(auto i = 0; i < 3; i++) {
           Serial.print(pose->get(i),4);
           Serial.print(",");
         }
@@ -155,7 +155,7 @@ void loop() {
   sonar.update();
 
   if(millis() - timer > 5000){
-    Serial.println("Still connected");
+    //Serial.println("Still connected");
     timer = millis();
   }
 }

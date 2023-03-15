@@ -62,15 +62,9 @@ class EncodedMotor{
 
         long lastEncoderSteps = 0;
         long encoderSteps = 0;
-        long targetEncoderSteps = 0;
-        long lastVelocity = 0;
-        long sumError = 0;
-        float wheelAngle = 0;
         float wheelRadius = 0.432;
         float currentVelocity = 0;
-        int kp = 100;
-        int ki = 1;
-        int kd = 10;
+        unsigned long lastTime = 0;
 
         // wheel diameter is 66 mm
         // The grear ratio is 120 motor turns : 1 wheel turn
@@ -80,13 +74,11 @@ class EncodedMotor{
         // 207.345/960 = 0.216 mm per step
         float stepsToMM = 0.432;
         static constexpr float stepsPerRevolution = 8*120; // 8*120 = 960;
-
-        int target_velocity = 0;
-        int past_velocity = 0;
         int maxVelocity = 255;
-        float acceleration = 0.01;
+        int targetVelocity = 0;
 
-        unsigned long lastTime = 0;
+        unsigned long timer = 0;
+
 
         /**
          * @brief Set the velocity of the motor

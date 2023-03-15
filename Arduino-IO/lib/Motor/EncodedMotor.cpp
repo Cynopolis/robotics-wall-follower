@@ -37,44 +37,35 @@ void EncodedMotor::update(volatile long &incriment) {
 
     // update the current step count with the incriment
     this->lastEncoderSteps = this->encoderSteps;
+    if(millis() - timer > 3000){
+        Serial.print("Encoder Steps: ");
+        Serial.println(this->encoderSteps);
+    }
+
     this->encoderSteps += incriment;
     // reset incriment to 0
     incriment = 0;
 
-    //float dt = (micros() - this->lastTime) / 1000000.0;
+    unsigned long now = millis();
+    float dt = float(now - this->lastTime) / 1000;
     float distance = (this->encoderSteps - this->lastEncoderSteps) * stepsToMM;
-    this->currentVelocity = distance;
+    this->currentVelocity = distance / dt;
 
-    lastTime = micros();
+    lastTime = now;
+
+    if(millis() - timer > 3000){
+        Serial.print("Current Velocity: ");
+        Serial.println(this->currentVelocity);
+        timer = millis();
+    }
     
     // Bypass PID
-    this->setVelocity(this->target_velocity);
+    this->setVelocity(this->targetVelocity);
     
 }
 
 void EncodedMotor::setTargetVelocity(int targetVelocity) {
-    this->target_velocity = targetVelocity;
-}
-
-void EncodedMotor::print() {
-    Serial.print("Encoder Steps: ");
-    Serial.print(encoderSteps);
-    Serial.print(" Target Encoder Steps: ");
-    Serial.print(targetEncoderSteps);
-    Serial.print(" Velocity: ");
-    Serial.print(getVelocity());
-    Serial.print(" Distance: ");
-    Serial.print(getDistance());
-    Serial.print(" Wheel Angle: ");
-    Serial.print(wheelAngle);
-    Serial.print(" Wheel Radius: ");
-    Serial.print(wheelRadius);
-    Serial.print(" Kp: ");
-    Serial.print(kp);
-    Serial.print(" Ki: ");
-    Serial.print(ki);
-    Serial.print(" Kd: ");
-    Serial.println(kd);
+    this->targetVelocity = targetVelocity;
 }
 
 void EncodedMotor::setVelocity(int velocity){
@@ -99,7 +90,7 @@ void EncodedMotor::setVelocity(int velocity){
         digitalWrite(backwardPin, LOW);
     }
     // map the velocity to the analog range of the PWM pin
-    velocity = map(abs(velocity), 0, maxVelocity, 0, 100);
+    velocity = map(abs(velocity), 0, maxVelocity, 0, 255);
     // write the new velocity to the PWM pin
     analogWrite(pwmPin, velocity);
 }
