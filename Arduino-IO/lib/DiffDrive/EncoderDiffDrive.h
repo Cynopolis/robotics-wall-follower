@@ -15,7 +15,7 @@ class EncoderDiffDrive{
          * @param rightMotor The right motor of the differential drive
          * @return None.
          */
-        EncoderDiffDrive(EncodedMotor leftMotor, EncodedMotor rightMotor, float wheelSeparation);
+        EncoderDiffDrive(EncodedMotor leftMotor, EncodedMotor rightMotor, float wheelSeperation);
         ~EncoderDiffDrive() = default;
 
         /**
@@ -31,14 +31,7 @@ class EncoderDiffDrive{
          * @post The incriment will be set to 0;
          * @return None.
          */
-        void update(volatile int32_t &leftIncriment, volatile int32_t &rightIncriment);
-
-        /**
-         * @brief set the wheel radius for each motor
-         * @param, wheelRadius The wheel radius of the motor in mm
-         * @return None.
-         */
-        void setWheelRadius(float wheelRadius);
+        void update(volatile long &leftIncriment, volatile long &rightIncriment);
 
         /**
          * @brief Get the pose of the robot
@@ -73,28 +66,15 @@ class EncoderDiffDrive{
         void setup();
 
         protected:
-            /**
-             * @brief Update the pose of the robot
-             * @param leftVelocity The velocity of the left motor in mm/s
-             * @param rightVelocity The velocity of the right motor in mm/s
-             */
-            void updatePose(float leftVelocity, float rightVelocity);
+            EncodedMotor leftMotor;
+            EncodedMotor rightMotor;
 
-            /**
-             * @brief Using the target pose and current pose, calculate the velocity of each motor
-             * @post The motor wheel velocities will be updated
-             */
-            void calculateMotorVelocities(float dt);
-
-            EncodedMotor encodedLeftMotor;
-            EncodedMotor encodedRightMotor;
-
-            unsigned long lastTime = 0;
-            Pose current_pose;
-            Pose target_pose;
+            unsigned long lastUpdateTime = 0;
+            Pose targetPose;
+            Pose currentPose;
             Pose sum_error = {0, 0, 0, 0, 0, 0};
             Pose last_error;
-            float wheelSeparation = 0;
+            float wheelSeperation = 0;
 
             float kp = 1;
             float ki = 1;

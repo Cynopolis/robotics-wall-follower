@@ -33,7 +33,7 @@ float EncodedMotor::getDistance() {
     return encoderSteps * stepsToMM;
 }
 
-void EncodedMotor::update(volatile int32_t &incriment) {
+void EncodedMotor::update(volatile long &incriment) {
 
     // update the current step count with the incriment
     this->lastEncoderSteps = this->encoderSteps;

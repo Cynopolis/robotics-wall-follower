@@ -1,4 +1,5 @@
 #pragma once
+#include <Arduino.h>
 
 // typedef struct pose
 typedef struct Pose{

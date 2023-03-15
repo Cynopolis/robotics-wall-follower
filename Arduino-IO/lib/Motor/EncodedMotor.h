@@ -31,7 +31,7 @@ class EncodedMotor{
          * @post The incriment will be set to 0;
          * @return None.
          */
-        void update(volatile int32_t &incriment);
+        void update(volatile long &incriment);
 
         /**
          * @brief Set the target distance of the motor in mm
