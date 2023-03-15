@@ -4,16 +4,16 @@
 // typedef struct pose
 typedef struct Pose{
     Pose() : x(0), y(0), theta(0), d_x(0), d_y(0), d_theta(0) {}
-    Pose(float x, float y, float theta, float d_x, float d_y, float d_theta) : x(x), y(y), theta(theta), d_x(d_x), d_y(d_y), d_theta(d_theta) {}
+    Pose(double x, double y, double theta, double d_x, double d_y, double d_theta) : x(x), y(y), theta(theta), d_x(d_x), d_y(d_y), d_theta(d_theta) {}
     // x and y are in mm
-    float x = 0;
-    float y = 0;
+    double x = 0;
+    double y = 0;
     // theta is in radians
-    float theta = 0;
+    double theta = 0;
     // d_x, d_y, and d_theta are the change in position and theta in mm/s and radians/s
-    float d_x = 0;
-    float d_y = 0;
-    float d_theta = 0;
+    double d_x = 0;
+    double d_y = 0;
+    double d_theta = 0;
 
     // Add a function to add two poses together
     Pose operator+(const Pose &other){
@@ -51,7 +51,7 @@ typedef struct Pose{
     }
 
     // add a function to multiply the pose by a constant
-    Pose operator*(const float constant){
+    Pose operator*(const double constant){
         Pose newPose;
         newPose.x = this->x * constant;
         newPose.y = this->y * constant;
@@ -63,7 +63,7 @@ typedef struct Pose{
     }
 
     // add a function to divide the pose by a constant
-    Pose operator/(const float constant){
+    Pose operator/(const double constant){
         Pose newPose;
         newPose.x = this->x / constant;
         newPose.y = this->y / constant;
@@ -74,7 +74,7 @@ typedef struct Pose{
         return newPose;
     }
 
-    const float get(uint8_t index){
+    const double get(uint8_t index){
         switch(index){
             case 0:
                 return this->x;
@@ -93,7 +93,7 @@ typedef struct Pose{
         }
     }
 
-    void set(uint8_t index, float value){
+    void set(uint8_t index, double value){
         switch(index){
             case 0:
                 this->x = value;

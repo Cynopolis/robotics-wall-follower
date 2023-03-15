@@ -8,7 +8,7 @@ void EncodedMotor::setup() {
     pinMode(forwardPin, OUTPUT);
     pinMode(backwardPin, OUTPUT);
     pinMode(pwmPin, OUTPUT);
-    this->lastTime = micros();
+    this->lastTime = millis();
     pinMode(encoderPinA, INPUT_PULLUP);
     pinMode(encoderPinB, INPUT_PULLUP);
 
@@ -33,16 +33,20 @@ float EncodedMotor::getDistance() {
     return encoderSteps * stepsToMM;
 }
 
-void EncodedMotor::update(volatile long &incriment) {
+void EncodedMotor::update(volatile int &incriment) {
 
     // update the current step count with the incriment
     this->lastEncoderSteps = this->encoderSteps;
-    if(millis() - timer > 3000){
+    bool print = false;
+    if((millis() - timer > 3000 || incriment > 100) && incriment != 0){
         Serial.print("Encoder Steps: ");
-        Serial.println(this->encoderSteps);
+        Serial.print(this->encoderSteps);
+        Serial.print(", Incriment: ");
+        Serial.println(incriment);
+        print = true;
     }
 
-    this->encoderSteps += incriment;
+    this->encoderSteps += long(incriment);
     // reset incriment to 0
     incriment = 0;
 
@@ -53,7 +57,7 @@ void EncodedMotor::update(volatile long &incriment) {
 
     lastTime = now;
 
-    if(millis() - timer > 3000){
+    if(print){
         Serial.print("Current Velocity: ");
         Serial.println(this->currentVelocity);
         timer = millis();

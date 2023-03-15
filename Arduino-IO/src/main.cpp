@@ -8,8 +8,8 @@
 Sonar sonar(trig_pin, echo_pin);
 Servo servo;
 
-volatile long leftEncoderCount = 0;
-volatile long rightEncoderCount = 0;
+volatile int leftEncoderCount = 0;
+volatile int rightEncoderCount = 0;
 
 // Incriment / Decrement depending on encoder state during an interrupt
 void leftEncoderInc(){
@@ -140,16 +140,18 @@ void loop() {
     doSerialCommand(args, args_length);
     ser.clearNewData();
   }
-
-  #ifdef USE_ENCODERS
-    wheels.update(leftEncoderCount, rightEncoderCount);
-  #else
-    wheels.update();
-  #endif
-  sonar.update();
-
-  if(millis() - timer > 5000){
-    //Serial.println("Still connected");
-    timer = millis();
+  if (millis() - timer > 100) {
+    Serial.print("Long time!! ");
+    Serial.println(millis() - timer);
   }
+  if(leftEncoderCount > 100 || rightEncoderCount > 100) {
+    Serial.print("Left: ");
+    Serial.print(leftEncoderCount);
+    Serial.print(" Right: ");
+    Serial.println(rightEncoderCount);
+  }
+
+  wheels.update(leftEncoderCount, rightEncoderCount);
+  timer = millis();
+  //sonar.update();
 }

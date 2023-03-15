@@ -15,7 +15,7 @@ class EncoderDiffDrive{
          * @param rightMotor The right motor of the differential drive
          * @return None.
          */
-        EncoderDiffDrive(EncodedMotor leftMotor, EncodedMotor rightMotor, float wheelSeperation);
+        EncoderDiffDrive(EncodedMotor leftMotor, EncodedMotor rightMotor, double wheelSeperation);
         ~EncoderDiffDrive() = default;
 
         /**
@@ -31,7 +31,7 @@ class EncoderDiffDrive{
          * @post The incriment will be set to 0;
          * @return None.
          */
-        void update(volatile long &leftIncriment, volatile long &rightIncriment);
+        void update(volatile int &leftIncriment, volatile int &rightIncriment);
 
         /**
          * @brief Get the pose of the robot
@@ -52,7 +52,7 @@ class EncoderDiffDrive{
          * @param kd The derivative constant
          * @return None.
          */
-        void setPID(float kp, float ki, float kd);
+        void setPID(double kp, double ki, double kd);
 
         /**
          * @brief Print out information about the encoder diff drive
@@ -74,11 +74,11 @@ class EncoderDiffDrive{
             Pose currentPose;
             Pose sumError = {0, 0, 0, 0, 0, 0};
             Pose pastError = {0, 0, 0, 0, 0, 0};
-            float wheelSeperation = 0;
+            double wheelSeperation = 0;
 
-            float kp = 1;
-            float ki = 1;
-            float kd = 1;
+            double kp = 1;
+            double ki = 1;
+            double kd = 1;
 
             unsigned long timer = 0;
 
