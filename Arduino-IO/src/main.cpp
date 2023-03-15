@@ -2,6 +2,8 @@
 #include "Pinout.h"
 #include "SerialMessage.h"
 #include "Sonar.h"
+#include "EncoderDiffDrive.h"
+
 
 Sonar sonar(trig_pin, echo_pin);
 Servo servo;
@@ -28,17 +30,9 @@ void rightEncoderInc(){
   }
 }
 
-#ifdef USE_ENCODERS
-  #include "EncoderDiffDrive.h"
-  EncodedMotor leftMotor(pinLF, pinLB, Lpwm_pin, left_encoder_pinA, left_encoder_pinB);
-  EncodedMotor rightMotor(pinRF, pinRB, Rpwm_pin, right_encoder_pinA, right_encoder_pinB);
-  EncoderDiffDrive wheels(leftMotor, rightMotor, 60); //TODO: Change this to the actual wheel separation
-#else
-  #include "DiffDrive.h"
-  Motor leftMotor(pinLF, pinLB, Lpwm_pin);
-  Motor rightMotor(pinRF, pinRB, Rpwm_pin);
-  DiffDrive wheels(leftMotor, rightMotor);
-#endif
+EncodedMotor leftMotor(pinLF, pinLB, Lpwm_pin, left_encoder_pinA, left_encoder_pinB);
+EncodedMotor rightMotor(pinRF, pinRB, Rpwm_pin, right_encoder_pinA, right_encoder_pinB);
+EncoderDiffDrive wheels(leftMotor, rightMotor, 165); //TODO: Change this to the actual wheel separation
 
 // Object to handle serial communication
 SerialMessage ser;
@@ -49,7 +43,7 @@ void setup() {
 
 
   wheels.setup();
-  wheels.setPID(0.1,0.001,0.001);
+  wheels.setPID(0.1,0.00,0.00);
   // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);

@@ -1,5 +1,4 @@
 #pragma once
-#include "Motor.h"
 #include <Arduino.h>
 
 class EncodedMotor{
