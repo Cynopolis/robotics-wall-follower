@@ -4,7 +4,12 @@ Motor::Motor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, volatile i
 forwardPin(forwardPin), backwardPin(backwardPin), pwmPin(pwmPin), incriment(incriment){}
 
 void Motor::setWheelRadius(float wheelRadius){
+    this->wheelRadius = wheelRadius;
     this->stepsToMM = 2*PI*wheelRadius*stepsPerRevolution;
+}
+
+float Motor::getWheelRadius(){
+    return this->wheelRadius;
 }
 
 float Motor::getVelocity(){
@@ -40,7 +45,7 @@ void Motor::setVelocity(int velocity){
         velocity = -255;
     }
     this->targetVelocity = velocity;
-    
+
     if(velocity > 0){
         digitalWrite(forwardPin, HIGH);
         digitalWrite(backwardPin, LOW);

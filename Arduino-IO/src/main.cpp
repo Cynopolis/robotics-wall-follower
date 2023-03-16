@@ -2,7 +2,7 @@
 #include "Pinout.h"
 #include "SerialMessage.h"
 #include "Sonar.h"
-#include "EncoderDiffDrive.h"
+#include "DiffDrive.h"
 
 
 Sonar sonar(trig_pin, echo_pin);
@@ -30,9 +30,9 @@ void rightEncoderInc(){
   }
 }
 
-EncodedMotor leftMotor(pinLF, pinLB, Lpwm_pin, left_encoder_pinA, left_encoder_pinB);
-EncodedMotor rightMotor(pinRF, pinRB, Rpwm_pin, right_encoder_pinA, right_encoder_pinB);
-EncoderDiffDrive wheels(leftMotor, rightMotor, 165); //TODO: Change this to the actual wheel separation
+EncodedMotor leftMotor(pinLF, pinLB, Lpwm_pin, &leftEncoderCount);
+EncodedMotor rightMotor(pinRF, pinRB, Rpwm_pin, &rightEncoderCount);
+EncoderDiffDrive wheels(&leftMotor, &rightMotor, 165); //TODO: Change this to the actual wheel separation
 
 // Object to handle serial communication
 SerialMessage ser;

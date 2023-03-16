@@ -18,6 +18,12 @@ class Motor{
          * @param wheelRadius The wheel radius of the motor in mm
         */
         void setWheelRadius(float wheelRadius);
+        
+        /**
+         * @brief get the current wheel radius
+         * @return float The wheel radius of the motor in mm
+        */
+        float getWheelRadius();
 
         /**
          * @brief Get the current linear velocity of the motor in mm/s
@@ -69,4 +75,5 @@ class Motor{
         int targetVelocity = 0;
 
         unsigned long timer = 0;
+        float wheelRadius = 33;
 };
