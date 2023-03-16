@@ -43,7 +43,7 @@ void setup() {
 
 
   wheels.begin();
-  wheels.setPID(1,0.01,0.00);
+  wheels.setPID(1.75,0.1,0.00);
   // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);
@@ -132,18 +132,16 @@ void loop() {
     doSerialCommand(args, args_length);
     ser.clearNewData();
   }
-  if (millis() - timer > 100) {
-    Serial.print("Long time!! ");
-    Serial.println(long(millis() - timer));
-  }
-  if(leftEncoderCount > 100 || rightEncoderCount > 100) {
-    Serial.print("Left: ");
-    Serial.print(leftEncoderCount);
-    Serial.print(" Right: ");
-    Serial.println(rightEncoderCount);
-  }
-
   wheels.update();
-  timer = millis();
+  // if (millis() - timer < 5000) {
+  //   wheels.update();
+  // }
+  // else{
+  //   leftMotor.setVelocity(0);
+  //   rightMotor.setVelocity(0);
+  // }
+  
+
+
   //sonar.update();
 }
