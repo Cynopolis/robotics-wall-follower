@@ -16,19 +16,27 @@ float Motor::getVelocity(){
     return this->currentVelocity;
 }
 
-void Motor::update(){
+float Motor::getDistanceSinceLastUpdate(){
+    return this->distanceSinceLastUpdate;
+}
+
+float Motor::update(){
     // calculate dt
     unsigned long now = millis();
     int time_diff = int(now - lastTime);
-    if(time_diff < 1 || *incriment == 0) return;
+    if(time_diff < 1 || *incriment == 0) return 0.0;
     lastTime = now;
     float dt = float(time_diff)*0.001;
 
     // calculate velocity
+    lastEncoderSteps = encoderSteps;
     encoderSteps += *incriment;
-    currentVelocity = (float(*incriment) * stepsToMM) / dt;
+    this->distanceSinceLastUpdate = (float(*incriment) * stepsToMM);
+    currentVelocity = this->distanceSinceLastUpdate / dt;
+    
     // reset incriment to 0
     *incriment = 0;
+    return this->distanceSinceLastUpdate;
 }
 
 void Motor::begin(){

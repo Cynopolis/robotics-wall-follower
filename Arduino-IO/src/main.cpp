@@ -30,9 +30,9 @@ void rightEncoderInc(){
   }
 }
 
-EncodedMotor leftMotor(pinLF, pinLB, Lpwm_pin, &leftEncoderCount);
-EncodedMotor rightMotor(pinRF, pinRB, Rpwm_pin, &rightEncoderCount);
-EncoderDiffDrive wheels(&leftMotor, &rightMotor, 165); //TODO: Change this to the actual wheel separation
+Motor leftMotor(pinLF, pinLB, Lpwm_pin, &leftEncoderCount);
+Motor rightMotor(pinRF, pinRB, Rpwm_pin, &rightEncoderCount);
+DiffDrive wheels(&leftMotor, &rightMotor, 165); //TODO: Change this to the actual wheel separation
 
 // Object to handle serial communication
 SerialMessage ser;
@@ -43,7 +43,7 @@ void setup() {
 
 
   wheels.begin();
-  wheels.setPID(0.1,0.00,0.00);
+  wheels.setPID(1,0.01,0.00);
   // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);
@@ -61,24 +61,19 @@ void doSerialCommand(int * args, int args_length) {
   switch (args[0]) {
     case MOTOR_READ:{
       Serial.print("!MTR,");
-      #ifdef USE_ENCODERS
-        // print the current pose
-        Pose *pose = (wheels.getCurrentPose());
-        for(auto i = 0; i < 6; i++) {
-          Serial.print(pose->get(i),4);
-          Serial.print(",");
-        }
-        // print the target pose
-        pose = (wheels.getTargetPose());
-        for(auto i = 0; i < 3; i++) {
-          Serial.print(pose->get(i),4);
-          Serial.print(",");
-        }
+      // print the current pose
+      float *pose = (wheels.getCurrentPose());
+      for(auto i = 0; i < 3; i++) {
+        Serial.print(pose[i],4);
+        Serial.print(",");
+      }
+      // print the target pose
+      pose = (wheels.getTargetPose());
+      for(auto i = 0; i < 3; i++) {
+        Serial.print(pose[i],4);
+        Serial.print(",");
+      }
 
-      #else
-        Serial.print(String(wheels.getAcceleration()) + "," + String(wheels.getMaxVelocity()));
-        Serial.print("," + String(wheels.getLeftTargetVelocity()) + "," + String(wheels.getRightTargetVelocity()));
-      #endif
       Serial.println(";");
       break;
     }
@@ -91,11 +86,8 @@ void doSerialCommand(int * args, int args_length) {
       }
       Serial.println(";");
       // set the new target pose
-      Pose *targetPose = (wheels.getTargetPose());
-      targetPose->x = args[1];
-      targetPose->y = args[2];
-      targetPose->theta = args[3];
-      wheels.print();
+      wheels.setTargetPose(args[1], args[2], args[3]);
+      //wheels.print();
       break;
     }
     case SONAR_READ:{ 
@@ -142,7 +134,7 @@ void loop() {
   }
   if (millis() - timer > 100) {
     Serial.print("Long time!! ");
-    Serial.println(millis() - timer);
+    Serial.println(long(millis() - timer));
   }
   if(leftEncoderCount > 100 || rightEncoderCount > 100) {
     Serial.print("Left: ");
@@ -151,7 +143,7 @@ void loop() {
     Serial.println(rightEncoderCount);
   }
 
-  wheels.update(leftEncoderCount, rightEncoderCount);
+  wheels.update();
   timer = millis();
   //sonar.update();
 }

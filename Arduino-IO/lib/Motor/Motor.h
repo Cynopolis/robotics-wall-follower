@@ -37,7 +37,7 @@ class Motor{
          * @post The incriment will be set to 0;
          * @return None.
          */
-        void update();
+        float update();
 
         /**
          * @brief Setup the motor
@@ -51,6 +51,12 @@ class Motor{
          * @return None.
          */
         void setVelocity(int velocity);
+
+        /**
+         * @brief Get the distance the motor has travelled since the last update
+         * @return float The distance the motor has travelled in mm
+         */
+        float getDistanceSinceLastUpdate();
     
     protected:
         // pins
@@ -59,8 +65,10 @@ class Motor{
         uint8_t pwmPin;
 
         long encoderSteps = 0;
-        float wheelRadius = 0.432;
+        long lastEncoderSteps = 0;
+        float wheelRadius = 33;
         float currentVelocity = 0;
+        float distanceSinceLastUpdate = 0;
         unsigned long lastTime = 0;
         volatile int* incriment;
 
@@ -75,5 +83,4 @@ class Motor{
         int targetVelocity = 0;
 
         unsigned long timer = 0;
-        float wheelRadius = 33;
 };

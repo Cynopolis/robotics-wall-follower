@@ -1,7 +1,5 @@
 #pragma once
-#include "Pose.h"
 #include "Motor.h"
-
 class DiffDrive{
     public:
 
@@ -22,16 +20,33 @@ class DiffDrive{
         void setPID(float kp, float ki, float kd);
 
         /**
-         * @brief Get the current pose of the robot. This is how you will set and read the current pose
-         * @return A pointer to the current pose
+         * @brief Get the current pose of the robot
+         * @return float* A pointer to an array of floats containing the current pose of the robot
         */
-        Pose* getCurrentPose();
+       float* getCurrentPose();
 
         /**
-         * @brief Get the target pose of the robot. This is how you will set the target pose
-         * @return A pointer to the target pose
+         * @brief Set the current pose of the robot
+         * @param x The x coordinate of the robot in mm
+         * @param y The y coordinate of the robot in mm
+         * @param theta The angle of the robot in radians
         */
-        Pose* getTargetPose();
+       void setCurrentPose(float x, float y, float theta);
+
+        /**
+         * @brief Get the target pose of the robot
+         * @return float* A pointer to an array of floats containing the target pose of the robot
+        */
+        float* getTargetPose();
+
+        /**
+         * @brief Set the target pose of the robot
+         * @param x The x coordinate of the robot in mm
+         * @param y The y coordinate of the robot in mm
+         * @param theta The angle of the robot in radians
+        */
+        void setTargetPose(float x, float y, float theta);
+
 
         /**
          * @brief Begin the controller
@@ -53,8 +68,28 @@ class DiffDrive{
         float ki = 0;
         float kd = 0;
 
-        Pose currentPose;
-        Pose targetPose;
+        float current_x = 0;
+        float current_y = 0;
+        float current_theta = 0;
+        
+        float target_x = 0;
+        float target_y = 0;
+        float target_theta = 0;
+
+        float last_error_x = 0;
+        float last_error_y = 0;
+        float last_error_theta = 0;
+
+        float sum_error_x = 0;
+        float sum_error_y = 0;
+        float sum_error_theta = 0;
+
+        float currentPose[3] = {current_x, current_y, current_theta};
+        float targetPose[3] = {target_x, target_y, target_theta};
 
         unsigned long lastTime;
+
+        constexpr static float TAU = 2*PI;
+
+        float angleDiff(float a, float b);
 };
