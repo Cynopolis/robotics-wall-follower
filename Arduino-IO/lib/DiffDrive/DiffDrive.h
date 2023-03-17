@@ -60,6 +60,19 @@ class DiffDrive{
 
 
     private:
+
+        /**
+         * @brief update the current pose of the robot
+         * @return none
+        */
+       void updatePose(float dt);
+
+       /**
+        * @brief calculate the new velocities for the motors based on the current and target poses.
+        * @return none
+       */
+      void calcMotorVels(float dt);
+
         Motor* leftMotor;
         Motor* rightMotor;
         float wheelSeparation;

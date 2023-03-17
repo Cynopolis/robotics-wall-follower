@@ -43,7 +43,7 @@ void setup() {
 
 
   wheels.begin();
-  wheels.setPID(1.75,0.1,0.00);
+  wheels.setPID(1.75,1,0.00);
   // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);

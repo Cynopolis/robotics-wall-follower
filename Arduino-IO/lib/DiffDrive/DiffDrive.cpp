@@ -47,12 +47,12 @@ void DiffDrive::update() {
     float dt = float(time_diff) / 1000.0;
     lastTime = now;
 
-    // update current pose
-    // leftMotor->update();
-    // rightMotor->update();
+    updatePose(dt);
+}
 
-    float leftDis = leftMotor->update();// leftMotor->getDistanceSinceLastUpdate();
-    float rightDis = rightMotor->update(); //rightMotor->getDistanceSinceLastUpdate();
+void DiffDrive::updatePose(float dt){
+    float leftDis = leftMotor->update();
+    float rightDis = rightMotor->update();
     float d_pos = (leftDis + rightDis) / 2.0;
     float d_theta = (rightDis - leftDis) / wheelSeparation;
     
@@ -63,35 +63,14 @@ void DiffDrive::update() {
 
     current_theta = fmod(current_theta + TAU, TAU);
 
-    // calculate new motor velocities
-
-    float d_theta_dt = d_theta / dt;
-    sum_error_theta += d_theta_dt;
-
-    float vel_left = kp * (255 - d_theta_dt * wheelSeparation / 2.0) + ki * d_theta_dt;
-    float vel_right = kp * (255 + d_theta_dt * wheelSeparation / 2.0) + ki * d_theta_dt;
-    leftMotor->setVelocity(vel_left);
-    rightMotor->setVelocity(vel_right);
-
-
-    // float error_x = target_x - current_x;
-    // float error_y = target_y - current_y;
-    // float error_theta = angleDiff(target_theta, current_theta);
-
-    // sum_error_x += error_x * dt;
-    // sum_error_y += error_y * dt;
-    // sum_error_theta += error_theta * dt;
-
-    // float vel_x = kp * error_x + ki * sum_error_x;
-    // float vel_y = kp * error_y + ki * sum_error_y;
-
-    // float rot_vel = kp * error_theta + ki * sum_error_theta;
-
-    // float vel_left = (vel_x - rot_vel * wheelSeparation / 2.0);
-    // float vel_right = (vel_x + rot_vel * wheelSeparation / 2.0);
-
-    // leftMotor->setVelocity(vel_left);
-    // rightMotor->setVelocity(vel_right);
+    if(d_theta != 0){
+        Serial.print("x: ");
+        Serial.print(current_x);
+        Serial.print(" y: ");
+        Serial.print(current_y);
+        Serial.print(" theta: ");
+        Serial.println(current_theta);
+    }
 }
 
 float DiffDrive::angleDiff(float a, float b) {
