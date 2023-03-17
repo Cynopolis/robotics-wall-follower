@@ -6,7 +6,7 @@
 
 
 Sonar sonar(trig_pin, echo_pin);
-Servo servo;
+//Servo servo;
 
 volatile int leftEncoderCount = 0;
 volatile int rightEncoderCount = 0;
@@ -43,14 +43,14 @@ void setup() {
 
 
   wheels.begin();
-  wheels.setPID(1.75,1,0.00);
+  wheels.setPID(3, 1, -1.5);
   // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);
 
-  servo.attach(servo_pin);
-  servo.write(90);
-  sonar.attachServo(servo);
+  // servo.attach(servo_pin);
+  // servo.write(90);
+  // sonar.attachServo(servo);
 
   sonar.enableScanMode(false);
   Serial.println("Started");

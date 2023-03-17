@@ -9,10 +9,10 @@
 // define motor pins
 #define Lpwm_pin  5     //pin of controlling speed---- ENA of motor driver board
 #define Rpwm_pin  6    //pin of controlling speed---- ENB of motor driver board
-#define pinLB 9 // will make the left motor go backwards
-#define pinLF 4 // will make the left motor go forwards
-#define pinRB 7 // will make the right motor go backwards
-#define pinRF 8 // will make the right motor go forwards
+#define pinLB 4 // will make the left motor go backwards
+#define pinLF 9 // will make the left motor go forwards
+#define pinRB 8 // will make the right motor go backwards
+#define pinRF 7 // will make the right motor go forwards
 
 //define encoder pins
 #define left_encoder_pinA 2 //interrupt pin

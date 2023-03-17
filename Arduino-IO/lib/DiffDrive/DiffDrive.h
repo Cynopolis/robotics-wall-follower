@@ -65,21 +65,21 @@ class DiffDrive{
          * @brief update the current pose of the robot
          * @return none
         */
-       void updatePose(float dt);
+       void updatePose(float dt, float leftDis, float rightDis);
 
        /**
         * @brief calculate the new velocities for the motors based on the current and target poses.
         * @return none
        */
-      void calcMotorVels(float dt);
+      void calcMotorVels(float dt, float leftDis, float rightDis);
 
         Motor* leftMotor;
         Motor* rightMotor;
         float wheelSeparation;
 
-        float kp = 1;
-        float ki = 0;
-        float kd = 0;
+        float k_rho = 1;
+        float k_alpha = 0;
+        float k_beta = 0;
 
         float current_x = 0;
         float current_y = 0;
@@ -105,4 +105,11 @@ class DiffDrive{
         constexpr static float TAU = 2*PI;
 
         float angleDiff(float a, float b);
+
+        /**
+         * @brief Wrap an angle to be between -PI and PI
+         * @param angle The angle to wrap
+         * @return float The wrapped angle
+        */
+        float wrap_angle(float angle);
 };
