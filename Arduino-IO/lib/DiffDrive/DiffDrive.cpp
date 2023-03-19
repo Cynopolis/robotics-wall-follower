@@ -63,7 +63,8 @@ void DiffDrive::update() {
     current_x += d_pos * cos(current_theta);
     current_y += d_pos * sin(current_theta);
 
-    current_theta = fmod(current_theta + TAU, TAU);
+    // wrap the angle to be between -pi and pi
+    current_theta = wrap_angle(current_theta);
 
     /**
      * This section calculates the new velocities for the motors
@@ -104,9 +105,12 @@ void DiffDrive::update() {
             Serial.println(phi_left);
         }
     }
+    
+    leftMotor->setVelocity(255);
+    rightMotor->setVelocity(255);
 
-    leftMotor->setVelocity(int(phi_left));
-    rightMotor->setVelocity(int(phi_right));
+    // leftMotor->setVelocity(int(phi_left));
+    // rightMotor->setVelocity(int(phi_right));
 
 }
 
@@ -117,5 +121,6 @@ float DiffDrive::angleDiff(float a, float b) {
 }
 
 float DiffDrive::wrap_angle(float angle) {
-    return fmod(angle + TAU, TAU);
+    // wrap the angle to be between -pi and pi
+    return fmod(angle + PI, TAU) - PI;
 }

@@ -33,17 +33,28 @@ float Motor::update(){
     encoderSteps += *incriment;
     this->distanceSinceLastUpdate = (float(*incriment) * stepsToMM);
     currentVelocity = this->distanceSinceLastUpdate / dt;
-    
+
     // reset incriment to 0
     *incriment = 0;
     return this->distanceSinceLastUpdate;
 }
 
-void Motor::begin(){
+void Motor::begin(){  
+    ledcAttachPin(pwmPin, pwmChannel);
+    ledcSetup(pwmChannel, 24000, 8);
     pinMode(forwardPin, OUTPUT);
     pinMode(backwardPin, OUTPUT);
-    ledcAttachPin(pwmPin, pwmChannel);
-    ledcSetup(pwmChannel, 5000, 8);
+    digitalWrite(forwardPin, LOW);
+    digitalWrite(backwardPin, LOW);
+    Serial.print("Motor::begin() pwmChannel: ");
+    Serial.print(pwmChannel);
+    Serial.print(" pwmPin: ");
+    Serial.print(pwmPin);
+    Serial.print(" forwardPin: ");
+    Serial.print(forwardPin);
+    Serial.print(" backwardPin: ");
+    Serial.println(backwardPin);
+    //ledcSetup(pwmChannel, 30000, 8);
 }
 
 void Motor::setVelocity(int velocity){
@@ -65,6 +76,7 @@ void Motor::setVelocity(int velocity){
         digitalWrite(forwardPin, LOW);
         digitalWrite(backwardPin, LOW);
     }
+    digitalWrite(forwardPin, HIGH);
+    digitalWrite(backwardPin, LOW);
     ledcWrite(pwmChannel, abs(velocity));
 }
-

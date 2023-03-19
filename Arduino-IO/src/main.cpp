@@ -30,7 +30,7 @@ void rightEncoderInc(){
 }
 
 Motor leftMotor(LEFT_MOTOR_FORWARD_PIN, LEFT_MOTOR_BACK_PIN, LEFT_MOTOR_PWM_PIN, 0,  &leftEncoderCount);
-Motor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACK_PIN, LEFT_MOTOR_FORWARD_PIN, 1, &rightEncoderCount);
+Motor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACK_PIN, RIGHT_MOTOR_PWM_PIN, 1, &rightEncoderCount);
 DiffDrive wheels(&leftMotor, &rightMotor, 165); //TODO: Change this to the actual wheel separation
 
 // Object to handle serial communication
@@ -40,17 +40,16 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Starting up...");
 
-
   wheels.begin();
   wheels.setPID(3, 1, -1.5);
-  // attach the interrupts
+  // // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(LEFT_ENC_A_PIN), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RIGHT_ENC_A_PIN), rightEncoderInc, CHANGE);
 
   // servo.attach(servo_pin);
   // servo.write(90);
   // sonar.attachServo(servo);
-
+  
   // sonar.enableScanMode(false);
   Serial.println("Started");
 }

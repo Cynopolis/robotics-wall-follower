@@ -19,13 +19,13 @@
 
 
 
-#define RIGHT_MOTOR_PWM_PIN 25 //Controls the speed of the right motor
-#define RIGHT_MOTOR_FORWARD_PIN 26 //HIGH makes the right motor go forwards
-#define RIGHT_MOTOR_BACK_PIN 27 //HIGH makes the right motor go backwards
-#define LEFT_MOTOR_FORWARD_PIN 14 //HIGH makes the left motor go forwards
-#define LEFT_MOTOR_BACK_PIN 12 //HIGH makes the left motor go backwards
-#define LEFT_MOTOR_PWM_PIN 13 //Controls the speed of the left motor
 
 
 
 
+#define LEFT_MOTOR_PWM_PIN 25 //Controls the speed of the left motor
+#define LEFT_MOTOR_BACK_PIN 27 //HIGH makes the left motor go backwards
+#define LEFT_MOTOR_FORWARD_PIN 26 //HIGH makes the left motor go forwards
+#define RIGHT_MOTOR_FORWARD_PIN 14 //HIGH makes the right motor go forwards
+#define RIGHT_MOTOR_BACK_PIN 12 //HIGH makes the right motor go backwards
+#define RIGHT_MOTOR_PWM_PIN 13 //Controls the speed of the right motor
