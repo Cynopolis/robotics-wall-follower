@@ -1,94 +1,86 @@
 #pragma once
+#include <Arduino.h>
 
-class Motor {
+class Motor{
     public:
         /**
-         * @brief Construct a new Motor object
-         * @param forwardPin The pin to use for forward direction
-         * @param backwardPin The pin to use for backward direction
-         * @param pwmPin The pin to use for PWM
-         * @return None.
-         */
-        Motor(int forwardPin, int backwardPin, int pwmPin);
+         * @brief Construct a new Encoded Motor object
+         * @param forwardPin The pin to control the forward direction of the motor
+         * @param backwardPin The pin to control the backward direction of the motor
+         * @param pwmPin The pin to control the speed of the motor
+         * @param incriment The number of steps to incriment the encoder count by. (positive or negative)
+        */
+        Motor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, volatile int* incriment);
         ~Motor() = default;
         
         /**
-         * @brief initialize the pins. MUST be called before any other function and during or after the setup() function in main.cpp.
+         * @brief set the wheel radius
+         * @param wheelRadius The wheel radius of the motor in mm
         */
-        virtual void setup();
+        void setWheelRadius(float wheelRadius);
+        
+        /**
+         * @brief get the current wheel radius
+         * @return float The wheel radius of the motor in mm
+        */
+        float getWheelRadius();
 
         /**
-         * @brief Set the target velocity of the motor
-         * @param targetVelocity The target velocity of the motor
-         * @return None.
-         */
-        void setTargetVelocity(int targetVelocity);
-
-        /**
-         * @brief Get the target velocity of the motor
-         * @return int The target velocity of the motor
-         */
-        int getTargetVelocity();
-
-        /**
-         * @brief Get the velocity of the motor
+         * @brief Get the current linear velocity of the motor in mm/s
          * @return int The velocity of the motor
          */
-        virtual int getVelocity();
+        float getVelocity();
 
         /**
-         * @brief Set the maximum velocity of the motor
-         * @param maxVelocity The maximum velocity of the motor
+         * @brief updates the motor's state with current sensor data
+         * @param incriment The number of steps to incriment the encoder count by. (positive or negative)
+         * @post The incriment will be set to 0;
          * @return None.
          */
-        void setMaxVelocity(int maxVelocity);
+        float update();
 
         /**
-         * @brief Get the maximum velocity of the motor
-         * @return int The maximum velocity of the motor
-         */
-        int getMaxVelocity();
-
-        /**
-         * @brief Set the acceleration of the motor
-         * @param acceleration The acceleration of the motor
+         * @brief Setup the motor
          * @return None.
          */
-        void setAcceleration(int acceleration);
-
-        /**
-         * @brief Get the acceleration of the motor
-         * @return int The acceleration of the motor
-         */
-        int getAcceleration();
-
-        /**
-         * @brief updates the current velocity of the motor
-         * @return None.
-         */
-        virtual void update();
-
-        /**
-         * @brief print out the current state of the motor
-         * @return None.
-         */
-        virtual void print();
-
-    protected:
-        int target_velocity = 0;
-        float current_velocity = 0;
-        int maxVelocity = 100;
-        int acceleration = 150;
-        int forwardPin;
-        int backwardPin;
-        int pwmPin;
-        unsigned long lastTime = 0;
+        void begin();
 
         /**
          * @brief Set the velocity of the motor
          * @param velocity The velocity to set the motor to
          * @return None.
          */
-        void setVelocity(float velocity);
+        void setVelocity(int velocity);
 
+        /**
+         * @brief Get the distance the motor has travelled since the last update
+         * @return float The distance the motor has travelled in mm
+         */
+        float getDistanceSinceLastUpdate();
+    
+    protected:
+        // pins
+        uint8_t forwardPin;
+        uint8_t backwardPin;
+        uint8_t pwmPin;
+
+        long encoderSteps = 0;
+        long lastEncoderSteps = 0;
+        float wheelRadius = 33;
+        float currentVelocity = 0;
+        float distanceSinceLastUpdate = 0;
+        unsigned long lastTime = 0;
+        volatile int* incriment;
+
+        // wheel diameter is 66 mm
+        // The grear ratio is 120 motor turns : 1 wheel turn
+        // the encoder has 16 steps per motor revolution
+        // or 8*120 = 960 steps per wheel revolution
+        // 66*PI = 207.345 mm per wheel revolution
+        // 207.345/960 = 0.216 mm per step
+        float stepsToMM = 0.432;
+        static constexpr float stepsPerRevolution = 8*120; // 8*120 = 960;
+        int targetVelocity = 0;
+
+        unsigned long timer = 0;
 };

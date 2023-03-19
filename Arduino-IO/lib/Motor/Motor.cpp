@@ -1,116 +1,69 @@
 #include "Motor.h"
-#include <Arduino.h>
 
-Motor::Motor(int forwardPin, int backwardPin, int pwmPin) :
-    forwardPin(forwardPin), backwardPin(backwardPin), pwmPin(pwmPin) {}
+Motor::Motor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, volatile int* incriment) : 
+forwardPin(forwardPin), backwardPin(backwardPin), pwmPin(pwmPin), incriment(incriment){}
 
-void Motor::setup(){
-    // set the pins as outputs:
+void Motor::setWheelRadius(float wheelRadius){
+    this->wheelRadius = wheelRadius;
+    this->stepsToMM = 2*PI*wheelRadius*stepsPerRevolution;
+}
+
+float Motor::getWheelRadius(){
+    return this->wheelRadius;
+}
+
+float Motor::getVelocity(){
+    return this->currentVelocity;
+}
+
+float Motor::getDistanceSinceLastUpdate(){
+    return this->distanceSinceLastUpdate;
+}
+
+float Motor::update(){
+    // calculate dt
+    unsigned long now = millis();
+    int time_diff = int(now - lastTime);
+    if(time_diff < 1 || *incriment == 0) return 0.0;
+    lastTime = now;
+    float dt = float(time_diff)*0.001;
+
+    // calculate velocity
+    lastEncoderSteps = encoderSteps;
+    encoderSteps += *incriment;
+    this->distanceSinceLastUpdate = (float(*incriment) * stepsToMM);
+    currentVelocity = this->distanceSinceLastUpdate / dt;
+    
+    // reset incriment to 0
+    *incriment = 0;
+    return this->distanceSinceLastUpdate;
+}
+
+void Motor::begin(){
     pinMode(forwardPin, OUTPUT);
     pinMode(backwardPin, OUTPUT);
     pinMode(pwmPin, OUTPUT);
-    this->lastTime = micros();
 }
 
-void Motor::setVelocity(float velocity){
-    // make sure the requested velocity is within the set bounds
-    if (abs(velocity - maxVelocity) < 0.1 ) {
-        velocity = maxVelocity;
+void Motor::setVelocity(int velocity){
+    // make sure the velocity is in the range of -255 to 255
+    if(velocity > 255){
+        velocity = 255;
+    } else if(velocity < -255){
+        velocity = -255;
     }
-    else if (velocity < -maxVelocity) {
-        velocity = -maxVelocity;
-    }
-    // set the new motor direction based on the sign of the velocity
-    if (velocity > 0) {
+    this->targetVelocity = velocity;
+
+    if(velocity > 0){
         digitalWrite(forwardPin, HIGH);
         digitalWrite(backwardPin, LOW);
-    }
-    else if (velocity < 0) {
+    } else if(velocity < 0){
         digitalWrite(forwardPin, LOW);
         digitalWrite(backwardPin, HIGH);
-    }
-    else {
+    } else {
         digitalWrite(forwardPin, LOW);
         digitalWrite(backwardPin, LOW);
     }
-    // set the current velocity to the requested velocity
-    this->current_velocity = velocity;
-    // map the velocity to the analog range of the PWM pin
-    velocity = map(abs(velocity), 0, maxVelocity, 0, 255);
-    // write the new velocity to the PWM pin
-    analogWrite(pwmPin, velocity);
+    analogWrite(pwmPin, abs(velocity));
 }
 
-void Motor::setTargetVelocity(int targetVelocity) {
-    this->target_velocity = targetVelocity;
-}
-
-int Motor::getTargetVelocity() {
-    return target_velocity;
-}
-
-int Motor::getVelocity() {
-    return int(current_velocity);
-}
-
-void Motor::setMaxVelocity(int maxVelocity) {
-    this->maxVelocity = maxVelocity;
-}
-
-int Motor::getMaxVelocity() {
-    return maxVelocity;
-}
-
-void Motor::setAcceleration(int acceleration) {
-    this->acceleration = acceleration;
-}
-
-int Motor::getAcceleration() {
-    return acceleration;
-}
-
-void Motor::update(){
-    // if the current velocity is equal to the target velocity, do nothing
-    if (abs(current_velocity - target_velocity) < 0.1) {
-        current_velocity = target_velocity;
-        this->lastTime = micros();
-        return;
-    }
-    // calculate the time since the last update
-    float dt = float(micros() - lastTime)/1000000;
-    Serial.print("dt: ");
-    Serial.println(dt, 5);
-    this->lastTime = micros();
-
-    float newVel = current_velocity;
-    // calculate the new velocity based on the acceleration
-    if (current_velocity < target_velocity) {
-        newVel = newVel + float(acceleration) * dt;
-    }
-    else if (current_velocity > target_velocity) {
-        newVel = newVel - float(acceleration) * dt;
-    }
-
-    Serial.print("New Velocity: ");
-    Serial.println(newVel, 5);
-    
-    setVelocity(newVel);
-}
-
-void Motor::print(){
-    Serial.print("Target Velocity: ");
-    Serial.println(target_velocity);
-    Serial.print("Current Velocity: ");
-    Serial.println(int(current_velocity));
-    Serial.print("Max Velocity: ");
-    Serial.println(maxVelocity);
-    Serial.print("Acceleration: ");
-    Serial.println(acceleration);
-
-    Serial.print("Forward Pin: ");
-    Serial.println(forwardPin);
-    Serial.print("Backward Pin: ");
-    Serial.println(backwardPin);
-    Serial.print("PWM Pin: ");
-    Serial.println(pwmPin);
-}
