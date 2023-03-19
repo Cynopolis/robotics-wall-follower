@@ -76,7 +76,5 @@ void Motor::setVelocity(int velocity){
         digitalWrite(forwardPin, LOW);
         digitalWrite(backwardPin, LOW);
     }
-    digitalWrite(forwardPin, HIGH);
-    digitalWrite(backwardPin, LOW);
     ledcWrite(pwmChannel, abs(velocity));
 }

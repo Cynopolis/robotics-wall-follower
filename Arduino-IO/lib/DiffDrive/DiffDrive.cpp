@@ -106,8 +106,8 @@ void DiffDrive::update() {
         }
     }
     
-    leftMotor->setVelocity(255);
-    rightMotor->setVelocity(255);
+    leftMotor->setVelocity(50*(4+current_theta));
+    rightMotor->setVelocity(50*(4-current_theta));
 
     // leftMotor->setVelocity(int(phi_left));
     // rightMotor->setVelocity(int(phi_right));
