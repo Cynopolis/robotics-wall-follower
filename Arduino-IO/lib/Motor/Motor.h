@@ -10,7 +10,7 @@ class Motor{
          * @param pwmPin The pin to control the speed of the motor
          * @param incriment The number of steps to incriment the encoder count by. (positive or negative)
         */
-        Motor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, volatile int* incriment);
+        Motor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, uint8_t pwmChannel, volatile int* incriment);
         ~Motor() = default;
         
         /**
@@ -63,6 +63,7 @@ class Motor{
         uint8_t forwardPin;
         uint8_t backwardPin;
         uint8_t pwmPin;
+        uint8_t pwmChannel;
 
         long encoderSteps = 0;
         long lastEncoderSteps = 0;

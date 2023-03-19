@@ -1,7 +1,7 @@
 #include "Motor.h"
 
-Motor::Motor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, volatile int* incriment) : 
-forwardPin(forwardPin), backwardPin(backwardPin), pwmPin(pwmPin), incriment(incriment){}
+Motor::Motor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, uint8_t pwmChannel, volatile int* incriment) : 
+forwardPin(forwardPin), backwardPin(backwardPin), pwmPin(pwmPin), pwmChannel(pwmChannel), incriment(incriment){}
 
 void Motor::setWheelRadius(float wheelRadius){
     this->wheelRadius = wheelRadius;
@@ -42,7 +42,8 @@ float Motor::update(){
 void Motor::begin(){
     pinMode(forwardPin, OUTPUT);
     pinMode(backwardPin, OUTPUT);
-    pinMode(pwmPin, OUTPUT);
+    ledcAttachPin(pwmPin, pwmChannel);
+    ledcSetup(pwmChannel, 5000, 8);
 }
 
 void Motor::setVelocity(int velocity){
@@ -64,6 +65,6 @@ void Motor::setVelocity(int velocity){
         digitalWrite(forwardPin, LOW);
         digitalWrite(backwardPin, LOW);
     }
-    analogWrite(pwmPin, abs(velocity));
+    ledcWrite(pwmChannel, abs(velocity));
 }
 

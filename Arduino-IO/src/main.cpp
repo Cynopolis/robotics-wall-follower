@@ -1,11 +1,10 @@
 #include <Arduino.h>
-#include "Pinout.h"
+#include "PINOUT.h"
 #include "SerialMessage.h"
-#include "Sonar.h"
 #include "DiffDrive.h"
 
 
-Sonar sonar(trig_pin, echo_pin);
+// Sonar sonar(SONAR_TRIG_PIN, SONAR_ECHO_PIN);
 //Servo servo;
 
 volatile int leftEncoderCount = 0;
@@ -13,7 +12,7 @@ volatile int rightEncoderCount = 0;
 
 // Incriment / Decrement depending on encoder state during an interrupt
 void leftEncoderInc(){
-  if (digitalRead(left_encoder_pinA) == digitalRead(left_encoder_pinB)) {
+  if (digitalRead(LEFT_ENC_A_PIN) == digitalRead(LEFT_ENC_B_PIN)) {
     leftEncoderCount++;
     return;
   }
@@ -23,36 +22,36 @@ void leftEncoderInc(){
 
 // Incriment / Decrement depending on encoder state during an interrupt
 void rightEncoderInc(){
-  if (digitalRead(right_encoder_pinA) == digitalRead(right_encoder_pinB)) {
+  if (digitalRead(RIGHT_ENC_A_PIN) == digitalRead(RIGHT_ENC_B_PIN)) {
     rightEncoderCount--;
   } else {
     rightEncoderCount++;
   }
 }
 
-Motor leftMotor(pinLF, pinLB, Lpwm_pin, &leftEncoderCount);
-Motor rightMotor(pinRF, pinRB, Rpwm_pin, &rightEncoderCount);
+Motor leftMotor(LEFT_MOTOR_FORWARD_PIN, LEFT_MOTOR_BACK_PIN, LEFT_MOTOR_PWM_PIN, 0,  &leftEncoderCount);
+Motor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACK_PIN, LEFT_MOTOR_FORWARD_PIN, 1, &rightEncoderCount);
 DiffDrive wheels(&leftMotor, &rightMotor, 165); //TODO: Change this to the actual wheel separation
 
 // Object to handle serial communication
 SerialMessage ser;
 
 void setup() {
-  Serial.begin(serial_baud);
+  Serial.begin(115200);
   Serial.println("Starting up...");
 
 
   wheels.begin();
   wheels.setPID(3, 1, -1.5);
   // attach the interrupts
-  attachInterrupt(digitalPinToInterrupt(left_encoder_pinA), leftEncoderInc, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(right_encoder_pinA), rightEncoderInc, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LEFT_ENC_A_PIN), leftEncoderInc, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(RIGHT_ENC_A_PIN), rightEncoderInc, CHANGE);
 
   // servo.attach(servo_pin);
   // servo.write(90);
   // sonar.attachServo(servo);
 
-  sonar.enableScanMode(false);
+  // sonar.enableScanMode(false);
   Serial.println("Started");
 }
 
@@ -90,24 +89,24 @@ void doSerialCommand(int * args, int args_length) {
       //wheels.print();
       break;
     }
-    case SONAR_READ:{ 
-      Serial.print("!SNR,");
-      Serial.print(sonar.getAngleIncrement());
-      sonar.print();
-      Serial.println(";");
-      break;
-    }
-    case SONAR_WRITE:{
-      if(args_length < 2) break;
-      sonar.enableScanMode(args[1]==1);
-      sonar.setAngleIncrement(args[2]);
-      Serial.print("SNR,");
-      Serial.print(args[1]==1);
-      Serial.print(",");
-      Serial.print(args[2]);
-      Serial.println(";");
-      break;
-    }
+    // case SONAR_READ:{ 
+    //   Serial.print("!SNR,");
+    //   Serial.print(sonar.getAngleIncrement());
+    //   sonar.print();
+    //   Serial.println(";");
+    //   break;
+    // }
+    // case SONAR_WRITE:{
+    //   if(args_length < 2) break;
+    //   sonar.enableScanMode(args[1]==1);
+    //   sonar.setAngleIncrement(args[2]);
+    //   Serial.print("SNR,");
+    //   Serial.print(args[1]==1);
+    //   Serial.print(",");
+    //   Serial.print(args[2]);
+    //   Serial.println(";");
+    //   break;
+    // }
     case IR_READ:{
       Serial.println("IR_READ");
       break;

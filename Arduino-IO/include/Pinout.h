@@ -1,35 +1,31 @@
-#pragma once
-#define USE_ENCODERS //uncomment this line to use encoders
+/**
+ * @author: Quinn Henthorne henth013@d.umn.edu 7636568391
+*/
 
-#define debug_pin 13
+#define IR_PIN 23 //Reads data from IR reciever
 
-// define serial
-#define serial_baud 115200
+#define SONAR_TRIG_PIN 1 //Triggers the sonar sensor
+#define SONAR_ECHO_PIN 3 //Listens for a response back from the sonar sensor
 
-// define motor pins
-#define Lpwm_pin  5     //pin of controlling speed---- ENA of motor driver board
-#define Rpwm_pin  6    //pin of controlling speed---- ENB of motor driver board
-#define pinLB 4 // will make the left motor go backwards
-#define pinLF 9 // will make the left motor go forwards
-#define pinRB 8 // will make the right motor go backwards
-#define pinRF 7 // will make the right motor go forwards
+#define SERVO_PIN 19 //Controls the angle of the sonar servo
+#define LEFT_ENC_A_PIN 18 //A pin for the left motor encoder
+#define LEFT_ENC_B_PIN 5 //B pin for the left motor encoder
+#define RIGHT_ENC_A_PIN 17 //A pin for the right motor encoder
+#define RIGHT_ENC_B_PIN 16 //B pin for the right motor encoder
 
-//define encoder pins
-#define left_encoder_pinA 2 //interrupt pin
-#define left_encoder_pinB 10
-#define right_encoder_pinA 3 // interrupt pin
-#define right_encoder_pinB 11
 
-// define the pins for the sonar sensor
-#define echo_pin A0
-#define trig_pin A1
 
-// define the pin for the servo
-#define servo_pin A2
 
-// define the pin for the IR sensor
-#define IR_pin 12
 
-//Define pins for I2C
-#define SDA_pin 18
-#define SCL_pin 19
+
+
+#define RIGHT_MOTOR_PWM_PIN 25 //Controls the speed of the right motor
+#define RIGHT_MOTOR_FORWARD_PIN 26 //HIGH makes the right motor go forwards
+#define RIGHT_MOTOR_BACK_PIN 27 //HIGH makes the right motor go backwards
+#define LEFT_MOTOR_FORWARD_PIN 14 //HIGH makes the left motor go forwards
+#define LEFT_MOTOR_BACK_PIN 12 //HIGH makes the left motor go backwards
+#define LEFT_MOTOR_PWM_PIN 13 //Controls the speed of the left motor
+
+
+
+
