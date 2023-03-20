@@ -62,16 +62,19 @@ class DiffDrive{
     private:
 
         /**
-         * @brief update the current pose of the robot
-         * @return none
+         * @brief Wrap an angle to be between -PI and PI
+         * @param angle The angle to wrap
+         * @return float The wrapped angle
         */
-       void updatePose(float dt, float leftDis, float rightDis);
+        float wrap_angle(float angle);
 
-       /**
-        * @brief calculate the new velocities for the motors based on the current and target poses.
-        * @return none
-       */
-      void calcMotorVels(float dt, float leftDis, float rightDis);
+        /**
+         * @brief Calculate the shortest difference between two angles
+         * @param a The first angle
+         * @param b The second angle
+         * @return float The difference between the two angles
+        */
+        float angleDiff(float a, float b);
 
         Motor* leftMotor;
         Motor* rightMotor;
@@ -89,27 +92,13 @@ class DiffDrive{
         float target_y = 0;
         float target_theta = 0;
 
-        float last_error_x = 0;
-        float last_error_y = 0;
-        float last_error_theta = 0;
-
-        float sum_error_x = 0;
-        float sum_error_y = 0;
-        float sum_error_theta = 0;
+        float lastVel = 0;
 
         float currentPose[3] = {current_x, current_y, current_theta};
         float targetPose[3] = {target_x, target_y, target_theta};
 
         unsigned long lastTime;
-
+        bool isReversed = false;
         constexpr static float TAU = 2*PI;
-
-        float angleDiff(float a, float b);
-
-        /**
-         * @brief Wrap an angle to be between -PI and PI
-         * @param angle The angle to wrap
-         * @return float The wrapped angle
-        */
-        float wrap_angle(float angle);
+        
 };
