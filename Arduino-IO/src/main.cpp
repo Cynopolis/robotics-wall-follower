@@ -41,7 +41,7 @@ void setup() {
   Serial.println("Starting up...");
 
   wheels.begin();
-  wheels.setPID(0.03, 0.014, -0.003);
+  wheels.setPID(0.03, 200, -0.03);
   // // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(LEFT_ENC_A_PIN), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RIGHT_ENC_A_PIN), rightEncoderInc, CHANGE);
@@ -76,7 +76,7 @@ void doSerialCommand(int * args, int args_length) {
       break;
     }
     case MOTOR_WRITE:{
-      if(args_length < 3) break;
+      if(args_length < 4) break;
       Serial.print("!MTR_WRT,");
       for(int i = 1; i < args_length; i++) {
         Serial.print(args[i]);
@@ -86,6 +86,17 @@ void doSerialCommand(int * args, int args_length) {
       // set the new target pose
       wheels.setTargetPose(args[1], args[2], args[3]);
       //wheels.print();
+      break;
+    }
+    case 2:{
+      if(args_length < 4) break;
+      Serial.print("!CONSTWRT,");
+      for(int i = 1; i < args_length; i++) {
+        Serial.print(float(args[i])/1000.0);
+        Serial.print(",");
+      }
+      Serial.println(";");
+      wheels.setPID(float(args[1])/1000.0, float(args[2])/1000.0, float(args[3])/1000.0);
       break;
     }
     // case SONAR_READ:{ 
@@ -131,13 +142,7 @@ void loop() {
     ser.clearNewData();
   }
   wheels.update();
-  // if (millis() - timer < 5000) {
-  //   wheels.update();
-  // }
-  // else{
-  //   leftMotor.setVelocity(0);
-  //   rightMotor.setVelocity(0);
-  // }
+
   
 
 

@@ -92,16 +92,12 @@ void DiffDrive::update() {
     float alpha = wrap_angle(atan2(delta_y, delta_x) - current_theta);
     float beta = -current_theta - alpha;
 
-    // if(isReversed && rho < 50){
-    //     isReversed = false;
-    // }
+    // if alpha is in the left half plane, make rho negative
+    if(alpha > PI/2 || alpha < -PI/2){
+        isReversed = false;
+    }
 
-    // // if alpha is in the left half plane, make rho negative
-    // if(alpha > PI/2 || alpha < -PI/2){
-    //     isReversed = true;
-    // }
-
-    // if(isReversed) rho = -rho;
+    if(isReversed) rho = -rho;
 
     // float v = d_pos / dt; // v stands for velocity
     // float w = d_theta / dt; // w stands for omega (angular velocity)
@@ -114,17 +110,11 @@ void DiffDrive::update() {
     float v_r = k_rho * (rho);
     float w_r = k_alpha * (alpha) + k_beta * (beta);
 
-    float phi_right = (127 + current_theta)/30;
-    float phi_left = (127 - current_theta)/30;
+    float phi_right = (v_r + w_r)/30;
+    float phi_left = (v_r - w_r)/30;
 
     float left_motor_speed = (0.25*120*phi_left)*255/7.4;
     float right_motor_speed = (0.25*120*phi_right)*255/7.4;
-
-    // // calculate the new velocities for the motors using the a matrix
-    // if(isReversed){
-    //     phi_right = 30*(v_r - w_r)/wheelSeparation;
-    //     phi_left = 30*(v_r + w_r)/wheelSeparation;
-    // }
 
     float max_vel = 180;
     if(abs(left_motor_speed) > max_vel){
@@ -157,6 +147,10 @@ void DiffDrive::update() {
         Serial.print(alpha,4);
         Serial.print(" beta: ");
         Serial.println(beta,4);
+        Serial.print("v_r: ");
+        Serial.print(v_r,4);
+        Serial.print(" w_r: ");
+        Serial.println(w_r,4);
 
         if(left_motor_speed != 0 || right_motor_speed != 0){
             Serial.print("left_speed: ");
@@ -166,7 +160,7 @@ void DiffDrive::update() {
         }
     }
 
-    if(rho < 10){
+    if(abs(rho) < 10){
         leftMotor->setVelocity(0);
         rightMotor->setVelocity(0);
         return;
