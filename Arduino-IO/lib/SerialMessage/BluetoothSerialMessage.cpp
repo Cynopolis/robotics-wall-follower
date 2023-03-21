@@ -5,7 +5,7 @@ BluetoothSerialMessage::BluetoothSerialMessage(BluetoothSerial *serial){
 }
 
 void BluetoothSerialMessage::init(unsigned int baud_rate){
-    serial->begin("Contact Dummy");
+    serial->begin("MiniBot");
 }
 
 void BluetoothSerialMessage::printArgs(){

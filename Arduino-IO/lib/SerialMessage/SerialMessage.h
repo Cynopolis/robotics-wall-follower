@@ -1,5 +1,4 @@
 #pragma once
-#define num_chars 75
 #include "Arduino.h"
 
 // define some cosntants
