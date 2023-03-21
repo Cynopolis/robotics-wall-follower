@@ -107,6 +107,12 @@ void DiffDrive::update() {
     // float d_beta = -k_rho * sin(alpha);
 
     // calculate the new target velocity and angle for the motors to be drive at
+
+    if(abs(rho) < 10){
+        rho = 0;
+        alpha = 0;
+    }
+
     float v_r = k_rho * (rho);
     float w_r = k_alpha * (alpha) + k_beta * (beta);
 
@@ -158,12 +164,6 @@ void DiffDrive::update() {
             Serial.print(" right_speed: ");
             Serial.println(right_motor_speed,0);
         }
-    }
-
-    if(abs(rho) < 10){
-        leftMotor->setVelocity(0);
-        rightMotor->setVelocity(0);
-        return;
     }
     
     leftMotor->setVelocity(left_motor_speed);

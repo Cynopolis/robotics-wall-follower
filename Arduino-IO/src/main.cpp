@@ -41,7 +41,7 @@ void setup() {
   Serial.println("Starting up...");
 
   wheels.begin();
-  wheels.setPID(0.03, 200, -0.03);
+  wheels.setPID(0.03, 200, -0.3);
   // // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(LEFT_ENC_A_PIN), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RIGHT_ENC_A_PIN), rightEncoderInc, CHANGE);
