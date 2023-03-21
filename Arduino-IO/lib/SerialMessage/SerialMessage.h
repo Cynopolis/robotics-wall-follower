@@ -1,3 +1,5 @@
+#pragma once
+#define num_chars 75
 #include "Arduino.h"
 
 // define some cosntants
@@ -14,7 +16,12 @@ class SerialMessage{
         /**
          * @brief Construct a new Serial Message object
          */
-        SerialMessage() = default;
+        SerialMessage(HardwareSerial *serial = &Serial);
+
+        /**
+         * @brief Initialize the SerialMessage object
+         */
+        virtual void init(unsigned int baud_rate = 115200);
 
         /**
          * @brief Update the SerialMessage object and parse any data that's available
@@ -53,18 +60,24 @@ class SerialMessage{
         /**
          * @brief Prints the args array to the serial monitor
          */
-        void printArgs();
-    private:
-        void readSerial();
+        virtual void printArgs();
+
+    protected:
+        virtual void readSerial();
         void parseData();
 
         bool new_data = false;
         bool data_recieved = false;
+        bool recvInProgress = false;
         char data[num_chars]; // an array to store the received data
         char temp_data[num_chars]; // an array that will be used with strtok()
+        uint8_t ndx = 0;
         const static int args_length = 30;
         int populated_args = 0; // the number of args that have been populated for the current message
         int args[args_length];
         const char startMarker = '!';
         const char endMarker = ';';
+    
+    private:
+        HardwareSerial *serial;
 };

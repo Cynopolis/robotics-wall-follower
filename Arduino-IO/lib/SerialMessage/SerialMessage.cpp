@@ -1,19 +1,30 @@
 #include "SerialMessage.h"
 
+SerialMessage::SerialMessage(HardwareSerial *serial) :
+    serial(serial){}
+
+void SerialMessage::init(unsigned int baud_rate){
+    serial->begin(baud_rate);
+}
+
 void SerialMessage::readSerial(){
-    static boolean recvInProgress = false;
-    static byte ndx = 0;
     char c;
 
     // read the incoming serial data:
-    while (Serial.available() > 0 && data_recieved == false) {
+    while (serial->available() > 0 && data_recieved == false) {
         // get the neext character in the serial buffer
-        c = Serial.read();
-
+        c = serial->read();
         // only execute this if the startMarker has been received
+        // if the incoming character is the endMarker clean up and set the flags
         if (recvInProgress == true) {
-            // if the incoming character is not the endMarker...
-            if (c != endMarker) {
+            if (c == endMarker) {
+                data[ndx] = '\0'; // terminate the string
+                recvInProgress = false;
+                ndx = 0;
+                data_recieved = true;
+            }
+            // if the incoming character is not the endMarker
+            else {
                 // add it to the data array
                 data[ndx] = c;
                 ndx++; // increment the data array index
@@ -22,13 +33,6 @@ void SerialMessage::readSerial(){
                 if (ndx >= num_chars) {
                     ndx = num_chars - 1;
                 }
-            }
-            // if the incoming character is the endMarker clean up and set the flags
-            else {
-                data[ndx] = '\0'; // terminate the string
-                recvInProgress = false;
-                ndx = 0;
-                data_recieved = true;
             }
         }
         // if the incoming character is the startMarker, set the recvInProgress flag
@@ -59,8 +63,6 @@ void SerialMessage::update(){
         //   because strtok() used in parseData() replaces the commas with \0
         parseData();
         //printArgs();
-
-        // TODO: add code to do something with the data
         data_recieved = false;
         new_data = true;
     }
@@ -87,11 +89,11 @@ int SerialMessage::getPopulatedArgs(){
 }
 
 void SerialMessage::printArgs(){
-    Serial.print("Current number of args: ");
-    Serial.println(populated_args);
+    serial->print("Current number of args: ");
+    serial->println(populated_args);
     for (int i = 0; i < populated_args; i++) {
-        Serial.print(args[i]);
-        Serial.print(" ");
+        serial->print(args[i]);
+        serial->print(" ");
     }
-    Serial.println();
+    serial->println();
 }
