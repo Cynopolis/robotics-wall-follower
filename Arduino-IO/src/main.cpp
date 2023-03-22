@@ -51,7 +51,7 @@ void setup() {
   // // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(LEFT_ENC_A_PIN), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RIGHT_ENC_A_PIN), rightEncoderInc, CHANGE);
-
+  
   // servo.attach(servo_pin);
   // servo.write(90);
   // sonar.attachServo(servo);
@@ -101,7 +101,7 @@ void doSerialCommand(int * args, int args_length) {
       Serial.println(";");
       bleSerial.println(";");
       // set the new target pose
-      wheels.setTargetPose(args[1], args[2], args[3]);
+      wheels.setTargetPose(args[1], args[2], float(args[3])*PI/180);
       //wheels.print();
       break;
     }
