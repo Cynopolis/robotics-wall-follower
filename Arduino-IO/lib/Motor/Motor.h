@@ -79,8 +79,8 @@ class Motor{
         // or 8*120 = 960 steps per wheel revolution
         // 66*PI = 207.345 mm per wheel revolution
         // 207.345/960 = 0.216 mm per step
-        float stepsToMM = 0.432;
-        static constexpr float stepsPerRevolution = 8*120; // 8*120 = 960;
+        float stepsToMM = 0.2159845 * 1 / 3;
+        static constexpr float stepsPerRevolution = 8*120*2; // 8*120 = 960;
         int targetVelocity = 0;
 
         unsigned long timer = 0;
