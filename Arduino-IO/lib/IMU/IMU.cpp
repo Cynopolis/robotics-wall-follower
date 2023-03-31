@@ -91,13 +91,13 @@ void IMU::update_angle(){
     this->gyro.y = (double(imu.calcGyro(imu.gy)) - gyroOffset.y)*dt;
     this->gyro.z = (double(imu.calcGyro(imu.gz)) - gyroOffset.z)*dt;
 
-    this-> lpFilter = this->lpFilter * 0.995 + this->gyro * 0.005;
-    // wrap the angles between -pi and pi
-    // newOrientation.x = wrap_angle(newOrientation.x);
-    // newOrientation.y = wrap_angle(newOrientation.y);
-    // newOrientation.z = wrap_angle(newOrientation.z);
     // Update the orientation
-    this->orientation = this->orientation - this->gyro;
+    this->orientation = this->orientation - this->gyro * deg_to_rad;
+
+    // wrap the angles between -pi and pi
+    orientation.x = wrap_angle(orientation.x);
+    orientation.y = wrap_angle(orientation.y);
+    orientation.z = wrap_angle(orientation.z);
 }
 
 void IMU::print(){
