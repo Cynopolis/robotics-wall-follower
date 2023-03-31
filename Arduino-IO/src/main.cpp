@@ -3,6 +3,7 @@
 #include "SerialMessage.h"
 #include "DiffDrive.h"
 #include "BluetoothSerialMessage.h"
+#include "IMU.h"
 
 
 // Sonar sonar(SONAR_TRIG_PIN, SONAR_ECHO_PIN);
@@ -33,6 +34,7 @@ void rightEncoderInc(){
 Motor leftMotor(LEFT_MOTOR_FORWARD_PIN, LEFT_MOTOR_BACK_PIN, LEFT_MOTOR_PWM_PIN, 0,  &leftEncoderCount);
 Motor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACK_PIN, RIGHT_MOTOR_PWM_PIN, 1, &rightEncoderCount);
 DiffDrive wheels(&leftMotor, &rightMotor, 151/2); //1.86
+IMU imu;
 
 // Object to handle serial communication
 SerialMessage ser;
@@ -42,6 +44,7 @@ BluetoothSerialMessage bleSer(&bleSerial);
 void setup() {
   Serial.begin(115200);
   bleSer.init();
+  imu.begin();
 
   Serial.println("Starting up...");
   bleSerial.println("Starting up...");
@@ -170,9 +173,6 @@ void loop() {
     bleSer.clearNewData();
   }
   wheels.update();
-
-  
-
-
-  //sonar.update();
+  imu.update();
+  imu.print();
 }
