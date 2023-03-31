@@ -174,5 +174,8 @@ void loop() {
   }
   wheels.update();
   imu.update();
-  imu.print();
+  if(millis() - timer > 1000){
+    imu.print();
+    timer = millis();
+  }
 }

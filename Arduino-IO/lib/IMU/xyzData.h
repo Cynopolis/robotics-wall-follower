@@ -41,10 +41,10 @@ struct xyzData{
     }
 
     void print(){
-        Serial.print(x);
+        Serial.print(x, 5);
         Serial.print(",");
-        Serial.print(y);
+        Serial.print(y, 5);
         Serial.print(",");
-        Serial.print(z);
+        Serial.print(z, 5);
     }
 };

@@ -4,7 +4,7 @@ void IMU::begin(){
     Wire.begin();
     //Initialize the IMU
     uint8_t count = 0;
-    while (!imu.begin()){
+    while (!imu.begin(ACC_ADDRESS, MAG_ADDRESS, Wire)){
         Serial.println("Failed to connect to LSM9DS1. Attempt (" + String(count) + "/5)");
         count++;
         if(count > 5){
@@ -12,6 +12,7 @@ void IMU::begin(){
         }
     }
     this->isInitialized = true;
+    calibrate();
     Serial.println("LSM9DS1 online!");
     lastUpdate = millis();
     return;
@@ -22,20 +23,35 @@ void IMU::calibrate(){
         Serial.println("IMU not initialized. Cannot calibrate.");
         return;
     }
-    Serial.println("Calibrating IMU");
-    xyzData accelSum = xyzData();
-    xyzData gyroSum = xyzData();
-    xyzData magSum = xyzData();
-    for(int i = 0; i < 1000; i++){
-        update();
-        accelSum = accelSum + accel;
-        gyroSum = gyroSum + gyro;
-        magSum = magSum + mag;
+
+    Serial.println("Calibrating Gyro");
+    // wait for a little while to allow the gyro to settle.
+    delay(10);
+    // add up 1000 gyro readings
+    int i = 0;
+    unsigned long timer = millis();
+    while(i < 1000){
+        if ( imu.gyroAvailable() ){
+            i++;
+            imu.readGyro();
+            gyroOffset.x += imu.calcGyro(imu.gx);
+            gyroOffset.y += imu.calcGyro(imu.gy);
+            gyroOffset.z += imu.calcGyro(imu.gz);
+            
+        }
     }
-    this->accelOffset = accelSum / 1000;
-    this->gyroOffset = gyroSum / 1000;
-    this->magOffset = magSum / 1000;
-    this->isCalibrated = true;
+    // divide the sum by 1000 to get the average
+    gyroOffset = gyroOffset / 1000.0;
+
+    Serial.print("Accel Offset: ");
+    accelOffset.print();
+    Serial.println();
+    Serial.print("Gyro Offset: ");
+    gyroOffset.print();
+    Serial.println();
+    Serial.print("Mag Offset: ");
+    magOffset.print();
+    Serial.println();
     Serial.println("Calibration complete");
 }
 
@@ -44,34 +60,44 @@ void IMU::update(){
         Serial.println("IMU not initialized. Cannot update.");
         return;
     }
-    unsigned long now = millis();
-    if(now - lastUpdate < 1){
+    if(millis() - lastUpdate < 1){
         return;
     }
-    float dt = float(now - lastUpdate) / 1000.0;
 
-    imu.readAccel();
-    imu.readGyro();
-    imu.readMag();
-
-    this->accel = xyzData(imu.calcAccel(imu.ax), imu.calcAccel(imu.ay), imu.calcAccel(imu.az));
-    this->gyro = xyzData(imu.calcGyro(imu.gx)*deg_to_rad, imu.calcGyro(imu.gy)*deg_to_rad, imu.calcGyro(imu.gz)*deg_to_rad);
-    this->mag = xyzData(imu.calcMag(imu.mx), imu.calcMag(imu.my), imu.calcMag(imu.mz));
-    
-    if(isCalibrated){
-        this->accel = this->accel - this->accelOffset;
-        this->gyro = this->gyro - this->gyroOffset;
-        this->mag = this->mag - this->magOffset;
+    if(imu.accelAvailable()){
+        imu.readAccel();
+        this->accel = xyzData(imu.calcAccel(imu.ax), imu.calcAccel(imu.ay), imu.calcAccel(imu.az));
+        if(isCalibrated) this->accel = this->accel - this->accelOffset;
     }
 
-    // Calculate the new orientation
-    xyzData newOrientation = orientation + gyro * dt;
+    if(imu.gyroAvailable()){
+        imu.readGyro();
+        update_angle();
+    }
+
+    if(imu.magAvailable()){
+        imu.readMag();
+        this->mag = xyzData(imu.calcMag(imu.mx), imu.calcMag(imu.my), imu.calcMag(imu.mz));
+        if(isCalibrated) this->mag = this->mag - this->magOffset;
+    }
+}
+
+void IMU::update_angle(){
+    // calculate the change in time since the last time this function was called
+    double dt = double(millis() - lastGyroUpdate) / 1000;
+    lastGyroUpdate = millis();
+    // calculate the gyro values and make sure to subtract the offset
+    this->gyro.x = (double(imu.calcGyro(imu.gx)) - gyroOffset.x)*dt;
+    this->gyro.y = (double(imu.calcGyro(imu.gy)) - gyroOffset.y)*dt;
+    this->gyro.z = (double(imu.calcGyro(imu.gz)) - gyroOffset.z)*dt;
+
+    this-> lpFilter = this->lpFilter * 0.995 + this->gyro * 0.005;
     // wrap the angles between -pi and pi
-    newOrientation.x = wrap_angle(newOrientation.x);
-    newOrientation.y = wrap_angle(newOrientation.y);
-    newOrientation.z = wrap_angle(newOrientation.z);
+    // newOrientation.x = wrap_angle(newOrientation.x);
+    // newOrientation.y = wrap_angle(newOrientation.y);
+    // newOrientation.z = wrap_angle(newOrientation.z);
     // Update the orientation
-    this->orientation = newOrientation;
+    this->orientation = this->orientation - this->gyro;
 }
 
 void IMU::print(){

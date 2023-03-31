@@ -70,6 +70,7 @@ class IMU{
         bool isCalibrated = false;
 
         unsigned long lastUpdate = 0;
+        unsigned long lastGyroUpdate = 0;
 
         static constexpr float deg_to_rad = PI / 180;
         static constexpr float TAU = 2 * PI;
@@ -80,4 +81,6 @@ class IMU{
          * @return float contrained between -pi and pi
         */
         float wrap_angle(float angle);
+
+        void update_angle();
 };
