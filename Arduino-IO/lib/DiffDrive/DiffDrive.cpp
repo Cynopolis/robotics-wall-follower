@@ -57,7 +57,7 @@ float DiffDrive::wrap_angle(float angle) {
     return angle;
 }
 
-void DiffDrive::update() {
+void DiffDrive::update(IMU* imu) {
     /**
      * This section calculates the time since the last update
     */
@@ -76,9 +76,18 @@ void DiffDrive::update() {
     float d_pos = (leftDis + rightDis) / 2.0;
     float d_theta = (rightDis - leftDis) / wheelSeparation;
     
-
-    current_theta += d_theta;
-    current_theta = this->wrap_angle(current_theta);
+    if(imu != nullptr) {
+        if(abs(d_pos) < 0.001){
+            imu->freezeGyro(true);
+        }
+        else{
+            imu->freezeGyro(false);
+        }
+        current_theta = imu->getAngles().z;
+    } else {
+        current_theta += d_theta;
+        current_theta = this->wrap_angle(current_theta);
+    }
     current_x += d_pos * cos(current_theta);
     current_y += d_pos * sin(current_theta);
 

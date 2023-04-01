@@ -86,6 +86,12 @@ void IMU::update_angle(){
     // calculate the change in time since the last time this function was called
     double dt = double(millis() - lastGyroUpdate) / 1000;
     lastGyroUpdate = millis();
+
+    if(isGyroFrozen){
+        xyzData temp = xyzData(imu.calcGyro(imu.gx), imu.calcGyro(imu.gy), imu.calcGyro(imu.gz));
+        this->gyroOffset = this->gyroOffset*0.999 + temp*0.001;
+        return;
+    }
     // calculate the gyro values and make sure to subtract the offset
     this->gyro.x = (double(imu.calcGyro(imu.gx)) - gyroOffset.x)*dt;
     this->gyro.y = (double(imu.calcGyro(imu.gy)) - gyroOffset.y)*dt;
@@ -132,4 +138,8 @@ float IMU::wrap_angle(float angle) {
     }
 
     return angle;
+}
+
+const xyzData IMU::getAngles(){
+    return orientation;
 }

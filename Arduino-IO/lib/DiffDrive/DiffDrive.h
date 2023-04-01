@@ -1,5 +1,7 @@
 #pragma once
 #include "Motor.h"
+#include "IMU.h"
+#include "xyzData.h"
 class DiffDrive{
     public:
 
@@ -55,8 +57,9 @@ class DiffDrive{
 
         /**
          * @brief Update the controller
+         * @param imu The IMU to use
         */
-        void update();
+        void update(IMU* imu = nullptr);
 
 
     private:

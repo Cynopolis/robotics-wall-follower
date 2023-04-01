@@ -44,6 +44,7 @@ BluetoothSerialMessage bleSer(&bleSerial);
 void setup() {
   Serial.begin(115200);
   bleSer.init();
+  delay(1000);
   imu.begin();
 
   Serial.println("Starting up...");
@@ -172,10 +173,10 @@ void loop() {
     doSerialCommand(args, args_length);
     bleSer.clearNewData();
   }
-  wheels.update();
   imu.update();
-  if(millis() - timer > 1000){
-    imu.print();
-    timer = millis();
-  }
+  wheels.update(&imu);
+  // if(millis() - timer > 1000){
+  //   imu.print();
+  //   timer = millis();
+  // }
 }

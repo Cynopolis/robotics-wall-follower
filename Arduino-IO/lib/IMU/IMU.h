@@ -37,7 +37,7 @@ class IMU{
          * @param None
          * @return xyzData
         */
-        double * getAngles();
+        const xyzData getAngles();
 
         /**
          * @brief Get the acceleration data
@@ -52,6 +52,12 @@ class IMU{
          * @return None
         */
         void print();
+
+        /**
+         * @brief Freeze/unfreeze gyro updates
+         * @param freeze True to freeze, false to unfreeze
+        */
+        void freezeGyro(bool freeze){this->isGyroFrozen = freeze;}
 
     private:
         xyzData accel;
@@ -68,6 +74,7 @@ class IMU{
 
         bool isInitialized = false;
         bool isCalibrated = false;
+        bool isGyroFrozen = false;
 
         unsigned long lastUpdate = 0;
         unsigned long lastGyroUpdate = 0;
