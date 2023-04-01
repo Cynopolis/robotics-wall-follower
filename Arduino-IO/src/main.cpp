@@ -51,7 +51,7 @@ void setup() {
   bleSerial.println("Starting up...");
 
   wheels.begin();
-  wheels.setPID(0.03, 100, -1);
+  wheels.setPID(0.03, 10, -0.03);
   // // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(LEFT_ENC_A_PIN), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RIGHT_ENC_A_PIN), rightEncoderInc, CHANGE);
@@ -175,6 +175,7 @@ void loop() {
   }
   imu.update();
   wheels.update(&imu);
+  // wheels.update();
   // if(millis() - timer > 1000){
   //   imu.print();
   //   timer = millis();

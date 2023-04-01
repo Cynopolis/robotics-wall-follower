@@ -83,11 +83,19 @@ void DiffDrive::update(IMU* imu) {
         else{
             imu->freezeGyro(false);
         }
-        current_theta = imu->getAngles().z;
+        current_theta = imu->getOrientation().z;
     } else {
         current_theta += d_theta;
         current_theta = this->wrap_angle(current_theta);
     }
+    
+    // use the gyro to detect if the robot wheels have slipped
+    // if(abs(imu->getGyro().z - d_theta) > PI/6){
+    //     d_pos = 0;
+    //     d_theta = 0;
+    //     Serial.println("IMU Gyro:");
+    //     Serial.println(imu->getGyro().z);
+    // }
     current_x += d_pos * cos(current_theta);
     current_y += d_pos * sin(current_theta);
 
@@ -172,6 +180,13 @@ void DiffDrive::update(IMU* imu) {
             Serial.print(left_motor_speed,0);
             Serial.print(" right_speed: ");
             Serial.println(right_motor_speed,0);
+        }
+
+        if(imu != nullptr) {
+            Serial.print("IMU Angle:");
+            Serial.println(imu->getOrientation().z);
+            // Serial.print(" IMU Accel:");
+            // Serial.println(imu->getAccel().magnitude(),4);
         }
     }
     

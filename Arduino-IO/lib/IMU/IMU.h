@@ -37,7 +37,28 @@ class IMU{
          * @param None
          * @return xyzData
         */
-        const xyzData getAngles();
+        xyzData getOrientation();
+
+        /**
+         * @brief Get the acceleration data
+         * @param None
+         * @return xyzData
+        */
+        xyzData getAccel();
+
+        /**
+         * @brief Get the acceleration data
+         * @param None
+         * @return xyzData
+        */
+        xyzData getGyro();
+
+        /**
+         * @brief Get the acceleration data
+         * @param None
+         * @return xyzData
+        */
+        xyzData getMag();
 
         /**
          * @brief Get the acceleration data

@@ -29,7 +29,6 @@ void IMU::calibrate(){
     delay(10);
     // add up 1000 gyro readings
     int i = 0;
-    unsigned long timer = millis();
     while(i < 1000){
         if ( imu.gyroAvailable() ){
             i++;
@@ -42,6 +41,18 @@ void IMU::calibrate(){
     }
     // divide the sum by 1000 to get the average
     gyroOffset = gyroOffset / 1000.0;
+
+    i = 0;
+    while(i < 1000){
+        if(imu.accelAvailable()){
+            i++;
+            imu.readAccel();
+            accelOffset.x += imu.calcAccel(imu.ax);
+            accelOffset.y += imu.calcAccel(imu.ay);
+            accelOffset.z += imu.calcAccel(imu.az);
+        }
+    }
+    accelOffset = accelOffset / 1000.0;
 
     Serial.print("Accel Offset: ");
     accelOffset.print();
@@ -66,7 +77,7 @@ void IMU::update(){
 
     if(imu.accelAvailable()){
         imu.readAccel();
-        this->accel = xyzData(imu.calcAccel(imu.ax), imu.calcAccel(imu.ay), imu.calcAccel(imu.az));
+        this->accel = xyzData(imu.calcAccel(imu.ax), imu.calcAccel(imu.ay), imu.calcAccel(imu.az)) - accelOffset;
         if(isCalibrated) this->accel = this->accel - this->accelOffset;
     }
 
@@ -88,8 +99,8 @@ void IMU::update_angle(){
     lastGyroUpdate = millis();
 
     if(isGyroFrozen){
-        xyzData temp = xyzData(imu.calcGyro(imu.gx), imu.calcGyro(imu.gy), imu.calcGyro(imu.gz));
-        this->gyroOffset = this->gyroOffset*0.999 + temp*0.001;
+        // xyzData temp = xyzData(imu.calcGyro(imu.gx), imu.calcGyro(imu.gy), imu.calcGyro(imu.gz));
+        // this->gyroOffset = this->gyroOffset*0.999 + temp*0.001;
         return;
     }
     // calculate the gyro values and make sure to subtract the offset
@@ -98,7 +109,7 @@ void IMU::update_angle(){
     this->gyro.z = (double(imu.calcGyro(imu.gz)) - gyroOffset.z)*dt;
 
     // Update the orientation
-    this->orientation = this->orientation - this->gyro * deg_to_rad;
+    this->orientation = this->orientation + this->gyro * deg_to_rad;
 
     // wrap the angles between -pi and pi
     orientation.x = wrap_angle(orientation.x);
@@ -140,6 +151,18 @@ float IMU::wrap_angle(float angle) {
     return angle;
 }
 
-const xyzData IMU::getAngles(){
+xyzData IMU::getOrientation(){
     return orientation;
+}
+
+xyzData IMU::getAccel(){
+    return accel;
+}
+
+xyzData IMU::getGyro(){
+    return gyro;
+}
+
+xyzData IMU::getMag(){
+    return mag;
 }

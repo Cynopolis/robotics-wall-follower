@@ -34,6 +34,10 @@ struct xyzData{
         return xyzData(this->x / scalar, this->y / scalar, this->z / scalar);
     }
 
+    float magnitude(){
+        return sqrt(x*x + y*y + z*z);
+    }
+
     void operator=(xyzData other){
         this->x = other.x;
         this->y = other.y;
