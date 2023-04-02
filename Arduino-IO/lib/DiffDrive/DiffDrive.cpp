@@ -10,30 +10,20 @@ void DiffDrive::setPID(float kp, float ki, float kd) {
     this->k_beta = kd;
 }
 
-float* DiffDrive::getCurrentPose() {
-    currentPose[0] = current_x;
-    currentPose[1] = current_y;
-    currentPose[2] = current_theta;
+xyzData DiffDrive::getCurrentPose() {
     return currentPose;
 }
 
 void DiffDrive::setCurrentPose(float x, float y, float theta) {
-    current_x = x;
-    current_y = y;
-    current_theta = theta;
+    this->currentPose = xyzData(x, y, theta);
 }
 
-float* DiffDrive::getTargetPose() {
-    targetPose[0] = target_x;
-    targetPose[1] = target_y;
-    targetPose[2] = target_theta;
+xyzData DiffDrive::getTargetPose() {
     return targetPose;
 }
 
 void DiffDrive::setTargetPose(float x, float y, float theta) {
-    target_x = x;
-    target_y = y;
-    target_theta = theta;
+    this->targetPose = xyzData(x, y, theta);
 }
 
 void DiffDrive::begin() {
@@ -83,31 +73,23 @@ void DiffDrive::update(IMU* imu) {
         else{
             imu->freezeGyro(false);
         }
-        current_theta = imu->getOrientation().z;
+        currentPose.z = imu->getOrientation().z;
     } else {
-        current_theta += d_theta;
-        current_theta = this->wrap_angle(current_theta);
+        currentPose.z += d_theta;
+        currentPose.z = this->wrap_angle(currentPose.z);
     }
     
-    // use the gyro to detect if the robot wheels have slipped
-    // if(abs(imu->getGyro().z - d_theta) > PI/6){
-    //     d_pos = 0;
-    //     d_theta = 0;
-    //     Serial.println("IMU Gyro:");
-    //     Serial.println(imu->getGyro().z);
-    // }
-    current_x += d_pos * cos(current_theta);
-    current_y += d_pos * sin(current_theta);
+    currentPose.x += d_pos * cos(currentPose.z);
+    currentPose.x += d_pos * sin(currentPose.z);
 
     /**
      * This section calculates the new velocities for the motors
     */
     // calculate osme of the variables needed for the controller
-    float delta_x = target_x - current_x;
-    float delta_y = target_y - current_y;
-    float rho = sqrt(delta_x * delta_x + delta_y * delta_y);
-    float alpha = wrap_angle(atan2(delta_y, delta_x) - current_theta);
-    float beta = -current_theta - alpha;
+    xyzData delta = targetPose - currentPose;
+    float rho = sqrt(delta.x * delta.x + delta.y * delta.y);
+    float alpha = wrap_angle(atan2(delta.y, delta.x) - currentPose.z);
+    float beta = -currentPose.z - alpha;
 
     // if alpha is in the left half plane, make rho negative
     if(alpha > PI/2 || alpha < -PI/2){
@@ -154,16 +136,16 @@ void DiffDrive::update(IMU* imu) {
     // Print the current pose of the robot
     if(d_theta != 0){
         Serial.print("x: ");
-        Serial.print(current_x,4);
+        Serial.print(currentPose.x,4);
         Serial.print(" y: ");
-        Serial.print(current_y,4);
+        Serial.print(currentPose.y,4);
         Serial.print(" theta: ");
-        Serial.println(current_theta,4);
+        Serial.println(currentPose.z,4);
 
         Serial.print("d_x: ");
-        Serial.print(delta_x,4);
+        Serial.print(delta.x,4);
         Serial.print(" d_y: ");
-        Serial.print(delta_y,4);
+        Serial.print(delta.y,4);
         Serial.print(" rho: ");
         Serial.print(rho,4);
         Serial.print(" alpha: ");

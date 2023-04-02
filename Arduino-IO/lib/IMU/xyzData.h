@@ -44,6 +44,19 @@ struct xyzData{
         this->z = other.z;
     }
 
+    float get(uint8_t index){
+        switch(index){
+            case 0:
+                return x;
+            case 1:
+                return y;
+            case 2:
+                return z;
+            default:
+                return 0;
+        }
+    }
+
     void print(){
         Serial.print(x, 5);
         Serial.print(",");

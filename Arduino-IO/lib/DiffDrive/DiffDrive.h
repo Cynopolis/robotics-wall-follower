@@ -25,7 +25,7 @@ class DiffDrive{
          * @brief Get the current pose of the robot
          * @return float* A pointer to an array of floats containing the current pose of the robot
         */
-       float* getCurrentPose();
+       xyzData getCurrentPose();
 
         /**
          * @brief Set the current pose of the robot
@@ -39,7 +39,7 @@ class DiffDrive{
          * @brief Get the target pose of the robot
          * @return float* A pointer to an array of floats containing the target pose of the robot
         */
-        float* getTargetPose();
+        xyzData getTargetPose();
 
         /**
          * @brief Set the target pose of the robot
@@ -58,6 +58,7 @@ class DiffDrive{
         /**
          * @brief Update the controller
          * @param imu The IMU to use
+
         */
         void update(IMU* imu = nullptr);
 
@@ -87,18 +88,11 @@ class DiffDrive{
         float k_alpha = 0;
         float k_beta = 0;
 
-        float current_x = 0;
-        float current_y = 0;
-        float current_theta = 0;
-        
-        float target_x = 0;
-        float target_y = 0;
-        float target_theta = 0;
+        // The current pose of the robot. X position, y position in mm, and z stores the angle in radians
+        xyzData currentPose;
+        xyzData targetPose;
 
         float lastVel = 0;
-
-        float currentPose[3] = {current_x, current_y, current_theta};
-        float targetPose[3] = {target_x, target_y, target_theta};
 
         unsigned long lastTime;
         bool isReversed = false;

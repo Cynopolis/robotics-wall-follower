@@ -65,25 +65,25 @@ void setup() {
   bleSerial.println("Started");
 }
 
-// TODO: Finish writing this function
+// takes the serial args and executes the command
 void doSerialCommand(int * args, int args_length) {
   switch (args[0]) {
     case MOTOR_READ:{
       Serial.print("!MTR,");
       bleSerial.print("!MTR,");
       // print the current pose
-      float *pose = (wheels.getCurrentPose());
+      xyzData pose = (wheels.getCurrentPose());
       for(auto i = 0; i < 3; i++) {
-        Serial.print(pose[i],4);
-        bleSerial.print(pose[i],4);
+        Serial.print(pose.get(i),4);
+        bleSerial.print(pose.get(i),4);
         Serial.print(",");
         bleSerial.print(",");
       }
       // print the target pose
       pose = (wheels.getTargetPose());
       for(auto i = 0; i < 3; i++) {
-        Serial.print(pose[i],4);
-        bleSerial.print(pose[i],4);
+        Serial.print(pose.get(i),4);
+        bleSerial.print(pose.get(i),4);
         Serial.print(",");
         bleSerial.print(",");
       }
