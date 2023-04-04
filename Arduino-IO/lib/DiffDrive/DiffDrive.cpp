@@ -152,7 +152,8 @@ void DiffDrive::update(IMU* imu) {
     }
 
     // Print the current pose of the robot
-    if(d_theta != 0){
+    bool debug = false;
+    if(d_theta != 0 && debug){
         Serial.print("x: ");
         Serial.print(currentPose.x,4);
         Serial.print(" y: ");
