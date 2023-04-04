@@ -60,6 +60,8 @@ class IMU{
         */
         xyzData getMag();
 
+        xyzData getOrientationChange();
+
         /**
          * @brief Get the acceleration data
          * @param None
@@ -90,6 +92,7 @@ class IMU{
         xyzData magOffset;
 
         xyzData orientation;
+        xyzData lastOrientation;
 
         LSM9DS1 imu;
 

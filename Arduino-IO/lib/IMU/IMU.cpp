@@ -97,6 +97,8 @@ void IMU::update_angle(){
     // calculate the change in time since the last time this function was called
     double dt = double(millis() - lastGyroUpdate) / 1000;
     lastGyroUpdate = millis();
+    this->lastOrientation = this->orientation;
+
 
     if(isGyroFrozen){
         // xyzData temp = xyzData(imu.calcGyro(imu.gx), imu.calcGyro(imu.gy), imu.calcGyro(imu.gz));
@@ -153,6 +155,10 @@ float IMU::wrap_angle(float angle) {
 
 xyzData IMU::getOrientation(){
     return orientation;
+}
+
+xyzData IMU::getOrientationChange(){
+    return orientation - lastOrientation;
 }
 
 xyzData IMU::getAccel(){

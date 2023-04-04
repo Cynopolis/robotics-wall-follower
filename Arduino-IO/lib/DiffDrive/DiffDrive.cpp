@@ -66,21 +66,39 @@ void DiffDrive::update(IMU* imu) {
     float d_pos = (leftDis + rightDis) / 2.0;
     float d_theta = (rightDis - leftDis) / wheelSeparation;
     
+    wheelAngle += d_theta;
+    wheelAngle = wrap_angle(wheelAngle);
+
+    
     if(imu != nullptr) {
-        if(abs(d_pos) < 0.001){
+        imu->update();
+        if(abs(d_theta) < 0.001 || abs(d_pos) < 0.001){
             imu->freezeGyro(true);
         }
         else{
             imu->freezeGyro(false);
         }
         currentPose.z = imu->getOrientation().z;
+
+        if(abs(imu->getOrientationChange().z - d_theta) < 0.0065){
+            // no slip detected
+            currentPose.x += d_pos * cos(currentPose.z);
+            currentPose.y += d_pos * sin(currentPose.z);
+        }
+        else{
+            Serial.print("Slip detected: ");
+            Serial.print(imu->getOrientationChange().z - d_theta, 5);
+            Serial.print(" ");
+            Serial.println(imu->getOrientation().z);
+        }
     } else {
-        currentPose.z += d_theta;
-        currentPose.z = this->wrap_angle(currentPose.z);
+        currentPose.z = wheelAngle;
+        currentPose.x += d_pos * cos(currentPose.z);
+        currentPose.y += d_pos * sin(currentPose.z);
     }
     
-    currentPose.x += d_pos * cos(currentPose.z);
-    currentPose.x += d_pos * sin(currentPose.z);
+
+    
 
     /**
      * This section calculates the new velocities for the motors
@@ -166,7 +184,9 @@ void DiffDrive::update(IMU* imu) {
 
         if(imu != nullptr) {
             Serial.print("IMU Angle:");
-            Serial.println(imu->getOrientation().z);
+            Serial.print(imu->getOrientation().z, 4);
+            Serial.print("Wheel Angle:");
+            Serial.println(wheelAngle, 4);
             // Serial.print(" IMU Accel:");
             // Serial.println(imu->getAccel().magnitude(),4);
         }
