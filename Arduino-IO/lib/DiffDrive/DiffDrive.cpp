@@ -23,6 +23,7 @@ xyzData DiffDrive::getTargetPose() {
 }
 
 void DiffDrive::setTargetPose(float x, float y, float theta) {
+    theta = wrap_angle(theta);
     this->targetPose = xyzData(x, y, theta);
 }
 
@@ -71,13 +72,14 @@ void DiffDrive::update(IMU* imu) {
 
     
     if(imu != nullptr) {
-        imu->update();
         if(abs(d_theta) < 0.001 || abs(d_pos) < 0.001){
             imu->freezeGyro(true);
         }
         else{
             imu->freezeGyro(false);
         }
+        imu->update();
+
         currentPose.z = imu->getOrientation().z;
 
         if(abs(imu->getOrientationChange().z - d_theta) < 0.0065){
@@ -107,17 +109,14 @@ void DiffDrive::update(IMU* imu) {
     xyzData delta = targetPose - currentPose;
     float rho = sqrt(delta.x * delta.x + delta.y * delta.y);
     float alpha = wrap_angle(atan2(delta.y, delta.x) - currentPose.z);
-    float beta = -currentPose.z - alpha;
-
-    // if alpha is in the left half plane, make rho negative
-    if(alpha > PI/2 || alpha < -PI/2){
-        isReversed = false;
+    // float beta = -targetPose.z - alpha; not sure if this is right anymore
+    float beta = (targetPose.z - currentPose.z);
+    if(rho != 0){
+        beta /= pow(rho, 2);
     }
-
-    if(isReversed) rho = -rho;
-
-    // float v = d_pos / dt; // v stands for velocity
-    // float w = d_theta / dt; // w stands for omega (angular velocity)
+    else{
+        beta *= 10000;
+    }
 
     // float d_rho = -k_rho * rho * cos(alpha);
     // float d_alpha = k_rho * sin(alpha) - k_alpha * alpha - k_beta * beta;
@@ -131,7 +130,7 @@ void DiffDrive::update(IMU* imu) {
     }
 
     float v_r = k_rho * (rho);
-    float w_r = k_alpha * (alpha) + k_beta * (beta);
+    float w_r = k_alpha * (alpha) + k_beta * beta;
 
     float phi_right = (v_r + w_r)/30;
     float phi_left = (v_r - w_r)/30;
@@ -153,8 +152,10 @@ void DiffDrive::update(IMU* imu) {
 
     // Print the current pose of the robot
     bool debug = false;
-    if(d_theta != 0 && debug){
-        Serial.print("x: ");
+    if(debug){
+        Serial.print("dt: ");
+        Serial.print(dt,5);
+        Serial.print(" x: ");
         Serial.print(currentPose.x,4);
         Serial.print(" y: ");
         Serial.print(currentPose.y,4);

@@ -51,7 +51,8 @@ void setup() {
   bleSerial.println("Starting up...");
 
   wheels.begin();
-  wheels.setPID(0.2, 12, -0.03);
+  wheels.setPID(0.2, 12, 100);
+  // wheels.setPID(0, 0, 0);
   // // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(LEFT_ENC_A_PIN), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RIGHT_ENC_A_PIN), rightEncoderInc, CHANGE);
@@ -63,6 +64,7 @@ void setup() {
   // sonar.enableScanMode(false);
   Serial.println("Started");
   bleSerial.println("Started");
+  wheels.setTargetPose(400,-200,90*PI/180);
 }
 
 // takes the serial args and executes the command
@@ -175,6 +177,12 @@ void loop() {
   }
   // imu.update();
   wheels.update(&imu);
+  xyzData pose = (wheels.getCurrentPose());
+  Serial.print(pose.x, 4);
+  Serial.print(",");
+  Serial.print(pose.y, 4);
+  Serial.print(",");
+  Serial.println(pose.z, 4);
   // wheels.update();
   // if(millis() - timer > 1000){
   //   imu.print();

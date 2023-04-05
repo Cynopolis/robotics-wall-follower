@@ -87,7 +87,7 @@ class DiffDrive{
         float k_rho = 1;
         float k_alpha = 0;
         float k_beta = 0;
-
+        
         // The current pose of the robot. X position, y position in mm, and z stores the angle in radians
         xyzData currentPose;
         float wheelAngle = 0;
