@@ -64,7 +64,7 @@ void setup() {
   // sonar.enableScanMode(false);
   Serial.println("Started");
   bleSerial.println("Started");
-  // wheels.setTargetPose(400,-200,90*PI/180);
+  wheels.setTargetPose(400,-200,90*PI/180);
 }
 
 // takes the serial args and executes the command
@@ -177,12 +177,12 @@ void loop() {
   }
   // imu.update();
   wheels.update(&imu);
-  // xyzData pose = (wheels.getCurrentPose());
-  // Serial.print(pose.x, 4);
-  // Serial.print(",");
-  // Serial.print(pose.y, 4);
-  // Serial.print(",");
-  // Serial.println(pose.z, 4);
+  xyzData pose = (wheels.getCurrentPose());
+  Serial.print(pose.x, 4);
+  Serial.print(",");
+  Serial.print(pose.y, 4);
+  Serial.print(",");
+  Serial.println(pose.z, 4);
   // wheels.update();
   // if(millis() - timer > 1000){
   //   imu.print();

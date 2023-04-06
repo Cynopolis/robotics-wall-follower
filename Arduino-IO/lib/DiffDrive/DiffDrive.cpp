@@ -87,12 +87,12 @@ void DiffDrive::update(IMU* imu) {
             currentPose.x += d_pos * cos(currentPose.z);
             currentPose.y += d_pos * sin(currentPose.z);
         }
-        else{
-            Serial.print("Slip detected: ");
-            Serial.print(imu->getOrientationChange().z - d_theta, 5);
-            Serial.print(" ");
-            Serial.println(imu->getOrientation().z);
-        }
+        // else{
+        //     Serial.print("Slip detected: ");
+        //     Serial.print(imu->getOrientationChange().z - d_theta, 5);
+        //     Serial.print(" ");
+        //     Serial.println(imu->getOrientation().z);
+        // }
     } else {
         currentPose.z = wheelAngle;
         currentPose.x += d_pos * cos(currentPose.z);
