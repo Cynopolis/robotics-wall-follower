@@ -79,6 +79,16 @@ class SerialInterface:
             self.serial.write(message.encode('UTF-8'))
             return_msg = self.serial.readline().decode('UTF-8').strip()
     
+    def incrimentPose(self, x, y, theta):
+        message = "!3,"+str(x)+","+str(y)+","+str(theta * 180 / 3.14159265359)+";\n"
+        # keep writing until the response MTR_WRT is recieved or the timeout is reached
+        timer = time.time()
+        return_msg = ""
+        while return_msg.find(";") == -1 and time.time()-timer < 1:
+            self.serial.write(message.encode('UTF-8'))
+            return_msg = self.serial.readline().decode('UTF-8').strip()
+        
+    
     def setGains(self, k_rho, k_alpha, k_beta):
         message = "!2,"+str(k_rho*1000)+","+str(k_alpha*1000)+","+str(k_beta*1000)+";\n"
         # keep writing until the response CONSTWRT is recieved or the timeout is reached

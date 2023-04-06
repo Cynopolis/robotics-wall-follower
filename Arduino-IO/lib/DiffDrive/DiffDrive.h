@@ -2,6 +2,7 @@
 #include "Motor.h"
 #include "IMU.h"
 #include "xyzData.h"
+#define sgn(x) ((x) < 0 ? -1 : ((x) > 0 ? 1 : 0))
 class DiffDrive{
     public:
 

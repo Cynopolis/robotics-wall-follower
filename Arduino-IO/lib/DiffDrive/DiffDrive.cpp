@@ -111,11 +111,12 @@ void DiffDrive::update(IMU* imu) {
     float alpha = wrap_angle(atan2(delta.y, delta.x) - currentPose.z);
     // float beta = -targetPose.z - alpha; not sure if this is right anymore
     float beta = (targetPose.z - currentPose.z);
-    if(rho != 0){
-        beta /= pow(rho, 2);
+    if(abs(rho) < 12){
+        rho = 0;
+        alpha = 0;
     }
-    else{
-        beta *= 10000;
+    else if(rho != 0){
+        beta /= pow(rho, 2);
     }
 
     // float d_rho = -k_rho * rho * cos(alpha);
@@ -124,13 +125,10 @@ void DiffDrive::update(IMU* imu) {
 
     // calculate the new target velocity and angle for the motors to be drive at
 
-    if(abs(rho) < 10){
-        rho = 0;
-        alpha = 0;
-    }
+    
 
     float v_r = k_rho * (rho);
-    float w_r = k_alpha * (alpha) + k_beta * beta;
+    float w_r = k_alpha * (alpha) + k_beta * (beta);
 
     float phi_right = (v_r + w_r)/30;
     float phi_left = (v_r - w_r)/30;
@@ -141,18 +139,25 @@ void DiffDrive::update(IMU* imu) {
     float max_vel = 180;
     if(abs(left_motor_speed) > max_vel){
         float percent = abs(max_vel / left_motor_speed);
-        left_motor_speed *= percent;
+        // if(abs(left_motor_speed-right_motor_speed) > max_vel){
+        //     // Serial.print("Diff:");
+        //     // Serial.println(abs(left_motor_speed-right_motor_speed));
+        //     right_motor_speed *= -sgn(left_motor_speed);
+        // }
         right_motor_speed *= percent;
+        left_motor_speed *= percent;
     }
     if(abs(right_motor_speed) > max_vel){
         float percent = abs(max_vel / right_motor_speed);
+        // if(abs(left_motor_speed-right_motor_speed) > max_vel){
+        //     left_motor_speed *= -sgn(right_motor_speed);
+        // }
         left_motor_speed *= percent;
         right_motor_speed *= percent;
     }
 
     // Print the current pose of the robot
-    bool debug = false;
-    if(debug){
+    if(false){
         Serial.print("dt: ");
         Serial.print(dt,5);
         Serial.print(" x: ");

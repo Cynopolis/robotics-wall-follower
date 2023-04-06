@@ -51,7 +51,7 @@ void setup() {
   bleSerial.println("Starting up...");
 
   wheels.begin();
-  wheels.setPID(0.2, 12, 100);
+  wheels.setPID(0.2, 12, 40);
   // wheels.setPID(0, 0, 0);
   // // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(LEFT_ENC_A_PIN), leftEncoderInc, CHANGE);
@@ -64,7 +64,6 @@ void setup() {
   // sonar.enableScanMode(false);
   Serial.println("Started");
   bleSerial.println("Started");
-  wheels.setTargetPose(400,-200,90*PI/180);
 }
 
 // takes the serial args and executes the command
@@ -126,6 +125,21 @@ void doSerialCommand(int * args, int args_length) {
       wheels.setPID(float(args[1])/1000.0, float(args[2])/1000.0, float(args[3])/1000.0);
       break;
     }
+    case 3:{
+      if(args_length < 4) break;
+      Serial.print("!INCWRT,");
+      bleSerial.print("!INCWRT,");
+      for(int i = 1; i < args_length; i++) {
+        Serial.print(float(args[i]));
+        bleSerial.print(float(args[i]));
+        Serial.print(",");
+        bleSerial.print(",");
+      }
+      Serial.println(";");
+      xyzData currentPose = wheels.getCurrentPose();
+      wheels.setTargetPose(currentPose.x + args[1], currentPose.y + args[2], currentPose.z + float(args[3])*PI/180);
+
+    }
     // case SONAR_READ:{ 
     //   Serial.print("!SNR,");
     //   Serial.print(sonar.getAngleIncrement());
@@ -177,12 +191,6 @@ void loop() {
   }
   // imu.update();
   wheels.update(&imu);
-  xyzData pose = (wheels.getCurrentPose());
-  Serial.print(pose.x, 4);
-  Serial.print(",");
-  Serial.print(pose.y, 4);
-  Serial.print(",");
-  Serial.println(pose.z, 4);
   // wheels.update();
   // if(millis() - timer > 1000){
   //   imu.print();
