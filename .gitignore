@@ -1,2 +1,4 @@
 robotVenv/
 output.avi
+*.pyc
+__pycache__
