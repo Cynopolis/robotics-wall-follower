@@ -99,14 +99,12 @@ void DiffDrive::update(IMU* imu) {
         currentPose.y += d_pos * sin(currentPose.z);
     }
     
-
-    
-
     /**
      * This section calculates the new velocities for the motors
     */
     // calculate the error between the current pose and the target pose
-    xyzData error = targetPose - currentPose;
+    float avg_vel = (leftMotor->getVelocity() + rightMotor->getVelocity()) / 2.0;
+    xyzData error = targetPose - xyzData(avg_vel, 0, currentPose.z);
     sumError = sumError + (error * dt);
     xyzData dError = (error - lastError) / dt;
     lastError = error;

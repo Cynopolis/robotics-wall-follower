@@ -82,8 +82,8 @@ class DiffDrive{
         */
         float angleDiff(float a, float b);
 
-        Motor* leftMotor;
-        Motor* rightMotor;
+        SpeedMotor* leftMotor;
+        SpeedMotor* rightMotor;
         float wheelSeparation;
 
         xyzData velPID;
