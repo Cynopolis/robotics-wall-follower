@@ -26,11 +26,6 @@ class SpeedMotor : public PositionMotor{
         SpeedMotor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, uint8_t pwmChannel, volatile int * encoderCount);
         ~SpeedMotor() = default;
 
-        /**
-         * @return float the current velocity in units per second
-        */
-        float getVelocity() override;
-
     protected:
         float getError() override;
 };

@@ -27,7 +27,7 @@ float PositionMotor::getTargetPosition(){
 }
 
 float PositionMotor::getCurrentPosition(){
-    return float(encoderCount)*unitPerPulse;
+    return ((float)(encoderCount))*unitPerPulse;
 }
 
 void PositionMotor::setPID(float kp, float ki, float kd){
@@ -36,13 +36,16 @@ void PositionMotor::setPID(float kp, float ki, float kd){
     this->kd = kd;
 }
 
-float PositionMotor::update(){
+void PositionMotor::update(){
     // calculate dt
     unsigned long now = millis();
     int time_diff = int(now - lastTime);
-    if(time_diff < 1 || *incriment == 0) return 0.0;
+    if(time_diff < 1) return;
     lastTime = now;
     this->dt = float(time_diff)*0.001;
+
+    this->positionChange = float(*incriment)*unitPerPulse;
+    this->currentVelocity = this->positionChange/dt;
 
     // update encoder count
     lastEncoderCount = encoderCount;
@@ -62,11 +65,12 @@ float PositionMotor::update(){
     float velocity = kp*error + ki*integral + kd*derivative;
     // set the velocity
     setVelocity(velocity);
-
-    // return the current position
-    return getCurrentPosition();
 }
 
 float PositionMotor::getError(){
     return targetPosition - getCurrentPosition();
+}
+
+float PositionMotor::getVelocity(){
+    return this->currentVelocity;
 }

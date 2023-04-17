@@ -8,7 +8,3 @@ SpeedMotor::SpeedMotor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, 
 float SpeedMotor::getError(){
     return targetPosition - getVelocity();
 }
-
-float SpeedMotor::getVelocity(){
-    return float(encoderCount - lastEncoderCount)*unitPerPulse/dt;
-}

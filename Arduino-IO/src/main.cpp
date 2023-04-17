@@ -41,6 +41,14 @@ SerialMessage ser;
 BluetoothSerial bleSerial;
 BluetoothSerialMessage bleSer(&bleSerial);
 
+// Task to handle reading from the IMU
+void imuTask(void * parameter) {
+  for(;;) {
+    imu.update();
+    vTaskDelay(1);
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   bleSer.init();
@@ -50,12 +58,29 @@ void setup() {
   Serial.println("Starting up...");
   bleSerial.println("Starting up...");
 
+  leftMotor.setUnitPerPulse(0.2159845/1000); // steps per mm
+  rightMotor.setUnitPerPulse(0.2159845/1000); // steps per mm
+  float kp = 10000;
+  float ki = 0;
+  float kd = 0;
+  leftMotor.setPID(kp, ki, kd);
+  rightMotor.setPID(kp, ki, kd);
   wheels.begin();
   wheels.setVelocityPID(1, 0, 0);
   // wheels.setPID(0, 0, 0);
   // // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(LEFT_ENC_A_PIN), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RIGHT_ENC_A_PIN), rightEncoderInc, CHANGE);
+
+  // spawn a task to handle reading from the IMU
+  xTaskCreatePinnedToCore(
+    imuTask, /* Function to implement the task */
+    "IMU Task", /* Name of the task */
+    10000,  /* Stack size in words */
+    NULL,  /* Task input parameter */
+    1,  /* Priority of the task */
+    NULL,  /* Task handle. */
+    0); /* Core where the task should run */
   
   // servo.attach(servo_pin);
   // servo.write(90);
@@ -150,9 +175,18 @@ void doSerialCommand(int * args, int args_length) {
     // set the motor pid constants
     case SET_MOTOR_PID:{
       if(args_length < 5) break;
-      Serial.print("!MOTORPIDWRT,");
-      bleSerial.print("!MOTORPIDWRT,");
-      for(int i = 1; i < args_length; i++) {
+      if(args[1] == 0) {
+        Serial.print("!LEFTMTRPID,");
+        bleSerial.print("!LEFTMTRPID,");
+        leftMotor.setPID(float(args[2])/1000.0, float(args[3])/1000.0, float(args[4])/1000.0);
+      } else {
+        Serial.print("!RIGHTMTRPID,");
+        bleSerial.print("!RIGHTMTRPID,");
+        rightMotor.setPID(float(args[2])/1000.0, float(args[3])/1000.0, float(args[4])/1000.0);
+      }
+      Serial.print(args[1]);
+      bleSerial.print(args[1]);
+      for(int i = 2; i < args_length; i++) {
         Serial.print(float(args[i])/1000.0);
         bleSerial.print(float(args[i])/1000.0);
         Serial.print(",");
@@ -160,11 +194,6 @@ void doSerialCommand(int * args, int args_length) {
       }
       Serial.println(";");
       bleSerial.println(";");
-      if(args[1] == 0) {
-        leftMotor.setPID(float(args[2])/1000.0, float(args[3])/1000.0, float(args[4])/1000.0);
-      } else {
-        rightMotor.setPID(float(args[2])/1000.0, float(args[3])/1000.0, float(args[4])/1000.0);
-      }
       break;
     }
     default:{
@@ -191,6 +220,7 @@ void doSerialCommand(int * args, int args_length) {
 unsigned long timer = 0;
 
 void loop() {
+  timer = millis();
   ser.update();
   bleSer.update();
   if (ser.isNewData()) {
@@ -208,11 +238,6 @@ void loop() {
     doSerialCommand(args, args_length);
     bleSer.clearNewData();
   }
-  imu.update();
-  wheels.update(&imu);
-  // wheels.update();
-  // if(millis() - timer > 1000){
-  //   imu.print();
-  //   timer = millis();
-  // }
+  // imu.update();
+  wheels.update();
 }

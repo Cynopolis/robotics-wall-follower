@@ -6,7 +6,8 @@ forwardPin(forwardPin), backwardPin(backwardPin), pwmPin(pwmPin), pwmChannel(pwm
 Motor::Motor(uint8_t pwmPin, uint8_t pwmChannel) : forwardPin(-1), backwardPin(-1), pwmPin(pwmPin), pwmChannel(pwmChannel){}
 
 float Motor::getVelocity(){
-    return this->currentVelocity;
+    Serial.print("Motor::getVelocity() ");
+    return this->motorValue;
 }
 
 void Motor::begin(){  
@@ -33,13 +34,10 @@ void Motor::begin(){
     }
 }
 
-float Motor::update(){
-    return currentVelocity;
-}
+void Motor::update(){}
 
 void Motor::setVelocity(int velocity){
     if(forwardPin != 255 && backwardPin != 255){
-        Serial.println("Wrong function ran!");
         setPWMVelocity(velocity);
     } else {
         setServoVelocity(velocity);
@@ -54,7 +52,7 @@ void Motor::setServoVelocity(int velocity){
         velocity = -255;
     }
 
-    currentVelocity = (float)velocity;
+    motorValue = (float)velocity;
     Serial.print("Velocity: ");
     Serial.println(velocity);
     servo.write(map(velocity, -255, 255, 0, 180));
@@ -68,7 +66,7 @@ void Motor::setPWMVelocity(int velocity){
         velocity = -255;
     }
 
-    currentVelocity = (float)velocity;
+    motorValue = (float)velocity;
 
     if(velocity > 0){
         digitalWrite(forwardPin, HIGH);

@@ -8,8 +8,8 @@
 // feel free to add more commands here as needed
 enum Command{
     ERR,
-    GET_POSITION,
-    SET_POSITION,
+    GET_POSITION, // GET_POSITION : returns the current position of the robot
+    SET_POSITION, // SET_POSITION, velocity, angle : sets the target velocity vector of the robot
     SET_VELOCITY_CONSTANTS, // set the constants of the Swerve Drive
     SET_ANGLE_CONSTANTS, // set the constants of the Swerve Drive
     SET_MOTOR_PID // set the PID constants of the Swerve Drive

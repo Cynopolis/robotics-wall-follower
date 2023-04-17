@@ -45,7 +45,6 @@ class PositionMotor : public Motor{
         // These are here as a compatibility layer for the parent motor class
         void setTargetVelocity(float targetVelocity) override {setTargetPosition(targetVelocity);};
         float getTargetVelocity() override {return getTargetPosition();};
-        float getVelocity() override {return getCurrentPosition();};
 
 
         /**
@@ -61,6 +60,14 @@ class PositionMotor : public Motor{
         float getCurrentPosition();
 
         /**
+         * @brief return the last change in position
+         * @return float The change in position
+        */
+        float getPositionChange(){return positionChange;};
+
+        float getVelocity() override;
+
+        /**
          * @brief Set the PID constants for the motor
          * @param kp The proportional constant
          * @param ki The integral constant
@@ -72,13 +79,13 @@ class PositionMotor : public Motor{
          * @brief run any updates which need to be done continuously
          * @return float The current velocity of the motor
         */
-        float update();
+        void update();
     
     protected:
         uint16_t minAngle;
         uint16_t maxAngle;
 
-        float unitPerPulse = 0; // the units per number of encoder pulses. IE: mm per pulse or degrees per pulse
+        float unitPerPulse = 1; // the units per number of encoder pulses. IE: mm per pulse or degrees per pulse
         volatile int * incriment;
         long lastEncoderCount = 0;
         long encoderCount = 0;
@@ -91,7 +98,9 @@ class PositionMotor : public Motor{
         float kd = 0;
         float lastError = 0;
         float integral = 0;
-        float dt = 0;
+        float dt = 0.001;
+        float currentVelocity = 0;
+        float positionChange = 0;
 
         virtual float getError();
 };

@@ -30,7 +30,7 @@ class Motor{
         /**
          * @brief This is here as a forward compatibility function for children classes to override
          */
-        virtual float getTargetVelocity(){return currentVelocity;};
+        virtual float getTargetVelocity(){return motorValue;};
 
         /**
          * @brief this is here as a forward compatibility function for children classes to override
@@ -40,7 +40,7 @@ class Motor{
         /**
          * @brief run any updates which need to be done continuously
         */
-        virtual float update();
+        virtual void update();
 
         /**
          * @brief Setup the motor
@@ -63,9 +63,10 @@ class Motor{
         uint8_t pwmChannel;
         Servo servo;
 
-        float currentVelocity = 0;
 
     private:
         void setServoVelocity(int velocity);
         void setPWMVelocity(int velocity);
+        float motorValue = 0;
+
 };

@@ -67,8 +67,10 @@ void DiffDrive::update(IMU* imu) {
     /**
      * This section updates the current pose of the robot
     */
-    float leftDis = leftMotor->update();
-    float rightDis = rightMotor->update();
+    leftMotor->update();
+    rightMotor->update();
+    float leftDis = leftMotor->getPositionChange();
+    float rightDis = rightMotor->getPositionChange();
 
     float d_pos = (leftDis + rightDis) / 2.0;
     float d_theta = (rightDis - leftDis) / wheelSeparation;
@@ -131,6 +133,6 @@ void DiffDrive::update(IMU* imu) {
     }
 
     // set the new velocities
-    leftMotor->setVelocity(leftVel);
-    rightMotor->setVelocity(rightVel);
+    leftMotor->setTargetVelocity(leftVel);
+    rightMotor->setTargetVelocity(rightVel);
 }
