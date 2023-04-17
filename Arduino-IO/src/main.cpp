@@ -165,20 +165,7 @@ void doSerialCommand(int * args, int args_length) {
       } else {
         rightMotor.setPID(float(args[2])/1000.0, float(args[3])/1000.0, float(args[4])/1000.0);
       }
-    }
-    case INCRIMENT_MOVE:{
-      if(args_length < 3) break;
-      Serial.print("!INCWRT,");
-      bleSerial.print("!INCWRT,");
-      for(int i = 1; i < args_length; i++) {
-        Serial.print(float(args[i]));
-        bleSerial.print(float(args[i]));
-        Serial.print(",");
-        bleSerial.print(",");
-      }
-      Serial.println(";");
-      bleSerial.println(";");
-      // TODO: impliment this control system
+      break;
     }
     default:{
       Serial.println("!ERR;");

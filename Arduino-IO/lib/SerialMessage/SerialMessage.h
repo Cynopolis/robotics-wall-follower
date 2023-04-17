@@ -10,7 +10,6 @@ enum Command{
     ERR,
     GET_POSITION,
     SET_POSITION,
-    INCRIMENT_MOVE,
     SET_VELOCITY_CONSTANTS, // set the constants of the Swerve Drive
     SET_ANGLE_CONSTANTS, // set the constants of the Swerve Drive
     SET_MOTOR_PID // set the PID constants of the Swerve Drive
