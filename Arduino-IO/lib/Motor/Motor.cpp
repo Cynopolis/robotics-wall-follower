@@ -1,70 +1,74 @@
 #include "Motor.h"
 
-Motor::Motor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, uint8_t pwmChannel, volatile int* incriment) : 
-forwardPin(forwardPin), backwardPin(backwardPin), pwmPin(pwmPin), pwmChannel(pwmChannel), incriment(incriment){}
+Motor::Motor(uint8_t forwardPin, uint8_t backwardPin, uint8_t pwmPin, uint8_t pwmChannel) : 
+forwardPin(forwardPin), backwardPin(backwardPin), pwmPin(pwmPin), pwmChannel(pwmChannel){}
 
-void Motor::setWheelRadius(float wheelRadius){
-    this->wheelRadius = wheelRadius;
-    this->stepsToMM = 2*PI*wheelRadius*stepsPerRevolution;
-}
-
-float Motor::getWheelRadius(){
-    return this->wheelRadius;
-}
+Motor::Motor(uint8_t pwmPin, uint8_t pwmChannel) : forwardPin(-1), backwardPin(-1), pwmPin(pwmPin), pwmChannel(pwmChannel){}
 
 float Motor::getVelocity(){
     return this->currentVelocity;
 }
 
-float Motor::getDistanceSinceLastUpdate(){
-    return this->distanceSinceLastUpdate;
+void Motor::begin(){  
+    if(forwardPin != 255 && backwardPin != 255){
+        pinMode(forwardPin, OUTPUT);
+        pinMode(backwardPin, OUTPUT);
+        digitalWrite(forwardPin, LOW);
+        digitalWrite(backwardPin, LOW);
+        ledcAttachPin(pwmPin, pwmChannel);
+        ledcSetup(pwmChannel, 24000, 8);
+        Serial.print("Motor::begin() pwmChannel: ");
+        Serial.print(pwmChannel);
+        Serial.print(" pwmPin: ");
+        Serial.print(pwmPin);
+        Serial.print(" forwardPin: ");
+        Serial.print(forwardPin);
+        Serial.print(" backwardPin: ");
+        Serial.println(backwardPin);
+    }
+    else{
+        Serial.print("Motor::begin() Servo mode on pin:");
+        Serial.println(pwmPin);
+        servo.attach(pwmPin, pwmChannel, 0, 180, 670, 2330);
+    }
 }
 
 float Motor::update(){
-    // calculate dt
-    unsigned long now = millis();
-    int time_diff = int(now - lastTime);
-    if(time_diff < 1 || *incriment == 0) return 0.0;
-    lastTime = now;
-    float dt = float(time_diff)*0.001;
-
-    // calculate velocity
-    lastEncoderSteps = encoderSteps;
-    encoderSteps += *incriment;
-    this->distanceSinceLastUpdate = (float(*incriment) * stepsToMM);
-    currentVelocity = this->distanceSinceLastUpdate / dt;
-
-    // reset incriment to 0
-    *incriment = 0;
-    return this->distanceSinceLastUpdate;
-}
-
-void Motor::begin(){  
-    ledcAttachPin(pwmPin, pwmChannel);
-    ledcSetup(pwmChannel, 24000, 8);
-    pinMode(forwardPin, OUTPUT);
-    pinMode(backwardPin, OUTPUT);
-    digitalWrite(forwardPin, LOW);
-    digitalWrite(backwardPin, LOW);
-    Serial.print("Motor::begin() pwmChannel: ");
-    Serial.print(pwmChannel);
-    Serial.print(" pwmPin: ");
-    Serial.print(pwmPin);
-    Serial.print(" forwardPin: ");
-    Serial.print(forwardPin);
-    Serial.print(" backwardPin: ");
-    Serial.println(backwardPin);
-    //ledcSetup(pwmChannel, 30000, 8);
+    return currentVelocity;
 }
 
 void Motor::setVelocity(int velocity){
+    if(forwardPin != 255 && backwardPin != 255){
+        Serial.println("Wrong function ran!");
+        setPWMVelocity(velocity);
+    } else {
+        setServoVelocity(velocity);
+    }
+}
+
+void Motor::setServoVelocity(int velocity){
     // make sure the velocity is in the range of -255 to 255
     if(velocity > 255){
         velocity = 255;
     } else if(velocity < -255){
         velocity = -255;
     }
-    this->targetVelocity = velocity;
+
+    currentVelocity = (float)velocity;
+    Serial.print("Velocity: ");
+    Serial.println(velocity);
+    servo.write(map(velocity, -255, 255, 0, 180));
+}
+
+void Motor::setPWMVelocity(int velocity){
+    // make sure the velocity is in the range of -255 to 255
+    if(velocity > 255){
+        velocity = 255;
+    } else if(velocity < -255){
+        velocity = -255;
+    }
+
+    currentVelocity = (float)velocity;
 
     if(velocity > 0){
         digitalWrite(forwardPin, HIGH);

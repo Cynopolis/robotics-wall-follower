@@ -1,13 +1,19 @@
 #include "DiffDrive.h"
 #include <Arduino.h>
 
-DiffDrive::DiffDrive(Motor* leftMotor, Motor* rightMotor, float wheelSeparation) :
+DiffDrive::DiffDrive(SpeedMotor* leftMotor, SpeedMotor* rightMotor, float wheelSeparation) :
     leftMotor(leftMotor), rightMotor(rightMotor), wheelSeparation(wheelSeparation) {}
 
-void DiffDrive::setPID(float kp, float ki, float kd) {
-    this->k_rho = kp;
-    this->k_alpha = ki;
-    this->k_beta = kd;
+void DiffDrive::setVelocityPID(float kp, float ki, float kd) {
+    this->velPID.x = kp;
+    this->velPID.y = ki;
+    this->velPID.z = kd;
+}
+
+void DiffDrive::setAnglePID(float kp, float ki, float kd) {
+    this->anglePID.x = kp;
+    this->anglePID.y = ki;
+    this->anglePID.z = kd;
 }
 
 xyzData DiffDrive::getCurrentPose() {
@@ -22,9 +28,9 @@ xyzData DiffDrive::getTargetPose() {
     return targetPose;
 }
 
-void DiffDrive::setTargetPose(float x, float y, float theta) {
+void DiffDrive::setTargetPose(float velocity, float theta) {
     theta = wrap_angle(theta);
-    this->targetPose = xyzData(x, y, theta);
+    this->targetPose = xyzData(velocity, 0, theta);
 }
 
 void DiffDrive::begin() {
@@ -87,12 +93,6 @@ void DiffDrive::update(IMU* imu) {
             currentPose.x += d_pos * cos(currentPose.z);
             currentPose.y += d_pos * sin(currentPose.z);
         }
-        // else{
-        //     Serial.print("Slip detected: ");
-        //     Serial.print(imu->getOrientationChange().z - d_theta, 5);
-        //     Serial.print(" ");
-        //     Serial.println(imu->getOrientation().z);
-        // }
     } else {
         currentPose.z = wheelAngle;
         currentPose.x += d_pos * cos(currentPose.z);
@@ -105,114 +105,34 @@ void DiffDrive::update(IMU* imu) {
     /**
      * This section calculates the new velocities for the motors
     */
-    // calculate osme of the variables needed for the controller
-    xyzData delta = targetPose - currentPose;
-    float rho = sqrt(delta.x * delta.x + delta.y * delta.y);
-    float alpha = wrap_angle(atan2(delta.y, delta.x) - currentPose.z);
-    // float beta = -targetPose.z - alpha; not sure if this is right anymore
-    float beta = (targetPose.z - currentPose.z);
-    if(abs(rho) < 12){
-        rho = 0;
-        alpha = 0;
+    // calculate the error between the current pose and the target pose
+    xyzData error = targetPose - currentPose;
+    sumError = sumError + (error * dt);
+    xyzData dError = (error - lastError) / dt;
+    lastError = error;
+
+    // calculate the pid values
+    float vel = velPID.x * error.x + velPID.y * sumError.x + velPID.z * dError.x;
+    float angle = anglePID.x * error.z + anglePID.y * sumError.z + anglePID.z * dError.z;
+
+    // calculate the left and right velocities
+    float leftVel = vel - angle * wheelSeparation / 2.0;
+    float rightVel = vel + angle * wheelSeparation / 2.0;
+
+    // cap the velocities
+    float maxVel = 200;
+    if(abs(leftVel) > maxVel) {
+        float percent = maxVel / abs(leftVel);
+        leftVel *= percent;
+        rightVel *= percent;
     }
-    else if(rho != 0){
-        beta /= pow(rho, 2);
-    }
-
-    // float d_rho = -k_rho * rho * cos(alpha);
-    // float d_alpha = k_rho * sin(alpha) - k_alpha * alpha - k_beta * beta;
-    // float d_beta = -k_rho * sin(alpha);
-
-    // calculate the new target velocity and angle for the motors to be drive at
-
-    
-
-    float v_r = k_rho * (rho);
-    float w_r = k_alpha * (alpha) + k_beta * (beta);
-
-    float phi_right = (v_r + w_r)/30;
-    float phi_left = (v_r - w_r)/30;
-
-    float left_motor_speed = (0.25*120*phi_left)*255/7.4;
-    float right_motor_speed = (0.25*120*phi_right)*255/7.4;
-
-    float max_vel = 180;
-    if(abs(left_motor_speed) > max_vel){
-        float percent = abs(max_vel / left_motor_speed);
-        // if(abs(left_motor_speed-right_motor_speed) > max_vel){
-        //     // Serial.print("Diff:");
-        //     // Serial.println(abs(left_motor_speed-right_motor_speed));
-        //     right_motor_speed *= -sgn(left_motor_speed);
-        // }
-        right_motor_speed *= percent;
-        left_motor_speed *= percent;
-    }
-    if(abs(right_motor_speed) > max_vel){
-        float percent = abs(max_vel / right_motor_speed);
-        // if(abs(left_motor_speed-right_motor_speed) > max_vel){
-        //     left_motor_speed *= -sgn(right_motor_speed);
-        // }
-        left_motor_speed *= percent;
-        right_motor_speed *= percent;
+    if(abs(rightVel) > maxVel) {
+        float percent = maxVel / abs(rightVel);
+        leftVel *= percent;
+        rightVel *= percent;
     }
 
-    // Print the current pose of the robot
-    if(false){
-        Serial.print("dt: ");
-        Serial.print(dt,5);
-        Serial.print(" x: ");
-        Serial.print(currentPose.x,4);
-        Serial.print(" y: ");
-        Serial.print(currentPose.y,4);
-        Serial.print(" theta: ");
-        Serial.println(currentPose.z,4);
-
-        Serial.print("d_x: ");
-        Serial.print(delta.x,4);
-        Serial.print(" d_y: ");
-        Serial.print(delta.y,4);
-        Serial.print(" rho: ");
-        Serial.print(rho,4);
-        Serial.print(" alpha: ");
-        Serial.print(alpha,4);
-        Serial.print(" beta: ");
-        Serial.println(beta,4);
-        Serial.print("v_r: ");
-        Serial.print(v_r,4);
-        Serial.print(" w_r: ");
-        Serial.println(w_r,4);
-
-        if(left_motor_speed != 0 || right_motor_speed != 0){
-            Serial.print("left_speed: ");
-            Serial.print(left_motor_speed,0);
-            Serial.print(" right_speed: ");
-            Serial.println(right_motor_speed,0);
-        }
-
-        if(imu != nullptr) {
-            Serial.print("IMU Angle:");
-            Serial.print(imu->getOrientation().z, 4);
-            Serial.print("Wheel Angle:");
-            Serial.println(wheelAngle, 4);
-            // Serial.print(" IMU Accel:");
-            // Serial.println(imu->getAccel().magnitude(),4);
-        }
-    }
-    
-    leftMotor->setVelocity(left_motor_speed);
-    rightMotor->setVelocity(right_motor_speed);
-
+    // set the new velocities
+    leftMotor->setVelocity(leftVel);
+    rightMotor->setVelocity(rightVel);
 }
-
-
-
-// bound between -pi/2 and pi/2
-// float wrap_angle(float angle) {
-//     while (angle > PI/2) {
-//         angle -= PI;
-//     }
-//     while (angle <= -PI/2) {
-//         angle += PI;
-//     }
-//     return angle;
-// }

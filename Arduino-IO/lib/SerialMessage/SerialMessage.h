@@ -1,13 +1,20 @@
 #pragma once
 #include "Arduino.h"
 
-// define some cosntants
-#define MOTOR_READ 0
-#define MOTOR_WRITE 1
-#define SONAR_READ 2
-#define SONAR_WRITE 3
-#define IR_READ 4
+
 #define num_chars 100
+
+// create an enum for the different commands
+// feel free to add more commands here as needed
+enum Command{
+    ERR,
+    GET_POSITION,
+    SET_POSITION,
+    INCRIMENT_MOVE,
+    SET_VELOCITY_CONSTANTS, // set the constants of the Swerve Drive
+    SET_ANGLE_CONSTANTS, // set the constants of the Swerve Drive
+    SET_MOTOR_PID // set the PID constants of the Swerve Drive
+};
 
 
 class SerialMessage{

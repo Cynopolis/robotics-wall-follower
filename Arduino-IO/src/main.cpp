@@ -31,8 +31,8 @@ void rightEncoderInc(){
   }
 }
 
-Motor leftMotor(LEFT_MOTOR_FORWARD_PIN, LEFT_MOTOR_BACK_PIN, LEFT_MOTOR_PWM_PIN, 0,  &leftEncoderCount);
-Motor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACK_PIN, RIGHT_MOTOR_PWM_PIN, 1, &rightEncoderCount);
+SpeedMotor leftMotor(LEFT_MOTOR_FORWARD_PIN, LEFT_MOTOR_BACK_PIN, LEFT_MOTOR_PWM_PIN, 0,  &leftEncoderCount);
+SpeedMotor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACK_PIN, RIGHT_MOTOR_PWM_PIN, 1, &rightEncoderCount);
 DiffDrive wheels(&leftMotor, &rightMotor, 125); //151/1.86
 IMU imu;
 
@@ -51,7 +51,7 @@ void setup() {
   bleSerial.println("Starting up...");
 
   wheels.begin();
-  wheels.setPID(0.2, 12, 40);
+  wheels.setVelocityPID(1, 0, 0);
   // wheels.setPID(0, 0, 0);
   // // attach the interrupts
   attachInterrupt(digitalPinToInterrupt(LEFT_ENC_A_PIN), leftEncoderInc, CHANGE);
@@ -69,7 +69,12 @@ void setup() {
 // takes the serial args and executes the command
 void doSerialCommand(int * args, int args_length) {
   switch (args[0]) {
-    case MOTOR_READ:{
+    case ERR:{
+      Serial.println("!ERR;");
+      bleSerial.println("!ERR;");
+      break;
+    }
+    case GET_POSITION:{
       Serial.print("!MTR,");
       bleSerial.print("!MTR,");
       // print the current pose
@@ -93,7 +98,8 @@ void doSerialCommand(int * args, int args_length) {
       bleSerial.println(";");
       break;
     }
-    case MOTOR_WRITE:{
+    // set the current pose
+    case SET_POSITION:{
       if(args_length < 4) break;
       Serial.print("!MTR_WRT,");
       bleSerial.print("!MTR_WRT,");
@@ -106,14 +112,15 @@ void doSerialCommand(int * args, int args_length) {
       Serial.println(";");
       bleSerial.println(";");
       // set the new target pose
-      wheels.setTargetPose(args[1], args[2], float(args[3])*PI/180);
+      wheels.setCurrentPose(args[1], args[2], float(args[3])*PI/180);
       //wheels.print();
       break;
     }
-    case 2:{
+    // set the drive train control constants
+    case SET_VELOCITY_CONSTANTS:{
       if(args_length < 4) break;
-      Serial.print("!CONSTWRT,");
-      bleSerial.print("!CONSTWRT,");
+      Serial.print("!VELWRT,");
+      bleSerial.print("!VELWRT,");
       for(int i = 1; i < args_length; i++) {
         Serial.print(float(args[i])/1000.0);
         bleSerial.print(float(args[i])/1000.0);
@@ -122,11 +129,45 @@ void doSerialCommand(int * args, int args_length) {
       }
       Serial.println(";");
       bleSerial.println(";");
-      wheels.setPID(float(args[1])/1000.0, float(args[2])/1000.0, float(args[3])/1000.0);
+      wheels.setVelocityPID(float(args[1])/1000.0, float(args[2])/1000.0, float(args[3])/1000.0);
       break;
     }
-    case 3:{
+    case SET_ANGLE_CONSTANTS:{
       if(args_length < 4) break;
+      Serial.print("!ANGLEWRT,");
+      bleSerial.print("!ANGLEWRT,");
+      for(int i = 1; i < args_length; i++) {
+        Serial.print(float(args[i])/1000.0);
+        bleSerial.print(float(args[i])/1000.0);
+        Serial.print(",");
+        bleSerial.print(",");
+      }
+      Serial.println(";");
+      bleSerial.println(";");
+      wheels.setVelocityPID(float(args[1])/1000.0, float(args[2])/1000.0, float(args[3])/1000.0);
+      break;
+    }
+    // set the motor pid constants
+    case SET_MOTOR_PID:{
+      if(args_length < 5) break;
+      Serial.print("!MOTORPIDWRT,");
+      bleSerial.print("!MOTORPIDWRT,");
+      for(int i = 1; i < args_length; i++) {
+        Serial.print(float(args[i])/1000.0);
+        bleSerial.print(float(args[i])/1000.0);
+        Serial.print(",");
+        bleSerial.print(",");
+      }
+      Serial.println(";");
+      bleSerial.println(";");
+      if(args[1] == 0) {
+        leftMotor.setPID(float(args[2])/1000.0, float(args[3])/1000.0, float(args[4])/1000.0);
+      } else {
+        rightMotor.setPID(float(args[2])/1000.0, float(args[3])/1000.0, float(args[4])/1000.0);
+      }
+    }
+    case INCRIMENT_MOVE:{
+      if(args_length < 3) break;
       Serial.print("!INCWRT,");
       bleSerial.print("!INCWRT,");
       for(int i = 1; i < args_length; i++) {
@@ -136,36 +177,27 @@ void doSerialCommand(int * args, int args_length) {
         bleSerial.print(",");
       }
       Serial.println(";");
-      xyzData currentPose = wheels.getCurrentPose();
-      wheels.setTargetPose(currentPose.x + args[1], currentPose.y + args[2], currentPose.z + float(args[3])*PI/180);
-
-    }
-    // case SONAR_READ:{ 
-    //   Serial.print("!SNR,");
-    //   Serial.print(sonar.getAngleIncrement());
-    //   sonar.print();
-    //   Serial.println(";");
-    //   break;
-    // }
-    // case SONAR_WRITE:{
-    //   if(args_length < 2) break;
-    //   sonar.enableScanMode(args[1]==1);
-    //   sonar.setAngleIncrement(args[2]);
-    //   Serial.print("SNR,");
-    //   Serial.print(args[1]==1);
-    //   Serial.print(",");
-    //   Serial.print(args[2]);
-    //   Serial.println(";");
-    //   break;
-    // }
-    case IR_READ:{
-      Serial.println("IR_READ");
-      break;
+      bleSerial.println(";");
+      // TODO: impliment this control system
     }
     default:{
-      Serial.println("ERR");
+      Serial.println("!ERR;");
+      bleSerial.println("!ERR;");
       break;
     }
+    // case 3:{
+    //   if(args_length < 4) break;
+    //   Serial.print("!INCWRT,");
+    //   bleSerial.print("!INCWRT,");
+    //   for(int i = 1; i < args_length; i++) {
+    //     Serial.print(float(args[i]));
+    //     bleSerial.print(float(args[i]));
+    //     Serial.print(",");
+    //     bleSerial.print(",");
+    //   }
+    //   Serial.println(";");
+    //   xyzData currentPose = wheels.getCurrentPose();
+    //   wheels.setTargetPose(currentPose.x + args[1], currentPose.y + args[2], currentPose.z + float(args[3])*PI/180);
   }
 }
 
@@ -189,7 +221,7 @@ void loop() {
     doSerialCommand(args, args_length);
     bleSer.clearNewData();
   }
-  // imu.update();
+  imu.update();
   wheels.update(&imu);
   // wheels.update();
   // if(millis() - timer > 1000){

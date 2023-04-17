@@ -1,5 +1,5 @@
 #pragma once
-#include "Motor.h"
+#include "SpeedMotor.h"
 #include "IMU.h"
 #include "xyzData.h"
 #define sgn(x) ((x) < 0 ? -1 : ((x) > 0 ? 1 : 0))
@@ -12,7 +12,7 @@ class DiffDrive{
          * @param rightMotor A pointer to the right motor
          * @param wheelSeparation The distance between the wheels in mm
         */
-        DiffDrive(Motor* leftMotor, Motor* rightMotor, float wheelSeparation);
+        DiffDrive(SpeedMotor* leftMotor, SpeedMotor* rightMotor, float wheelSeparation);
 
         /**
          * @brief Set the PID constants for the controller
@@ -20,7 +20,8 @@ class DiffDrive{
          * @param ki The integral constant
          * @param kd The derivative constant
         */
-        void setPID(float kp, float ki, float kd);
+        void setVelocityPID(float kp, float ki, float kd);
+        void setAnglePID(float kp, float ki, float kd);
 
         /**
          * @brief Get the current pose of the robot
@@ -48,7 +49,7 @@ class DiffDrive{
          * @param y The y coordinate of the robot in mm
          * @param theta The angle of the robot in radians
         */
-        void setTargetPose(float x, float y, float theta);
+        void setTargetPose(float velocity, float theta);
 
 
         /**
@@ -85,14 +86,15 @@ class DiffDrive{
         Motor* rightMotor;
         float wheelSeparation;
 
-        float k_rho = 1;
-        float k_alpha = 0;
-        float k_beta = 0;
+        xyzData velPID;
+        xyzData anglePID;
         
         // The current pose of the robot. X position, y position in mm, and z stores the angle in radians
         xyzData currentPose;
         float wheelAngle = 0;
         xyzData targetPose;
+        xyzData sumError;
+        xyzData lastError;
 
         float lastVel = 0;
 
