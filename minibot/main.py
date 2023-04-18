@@ -1,72 +1,132 @@
-# from SerialInterface.SerialInterface import SerialInterface
-import cv2
+from Vision.Vision import Vision
+from SerialInterface.SerialInterface import SerialInterface
+from Graph.Graph import Graph
+from Graph.Vertex import Vertex
+from time import sleep
+from time import time
+from math import pi
 
-# open a webcam
-cam = cv2.VideoCapture(0)
+cam = Vision()
+ser = SerialInterface('/dev/ttyUSB0', 115200)
 
-# filter out yellow in the hsv color space
-low_yellow = (20, 100, 100)
-high_yellow = (30, 255, 255)
+robotPosition = ser.getPose()
+targetPosition = robotPosition.copy()
 
-# get the dimensions of the webcam
-x_dim = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
-y_dim = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
+# create the state machine
+states = Graph()
+searching = Vertex('searching') # searching for a new target
+search_relocation = Vertex('search_rellocation') # searching for a new target
+following = Vertex('following') # target is in sight and being followed
+lost = Vertex('lost') # target has been permanently lost
+reaquire = Vertex('reaquire') # target has been temporarily lost and is being reaquired
+states.addEdge(searching, following, 1)
+states.addEdge(searching, search_relocation, 1)
+states.addEdge(search_relocation, searching, 1)
+states.addEdge(following, reaquire, 1)
+states.addEdge(reaquire, following, 1)
+states.addEdge(reaquire, lost, 1)
+states.addEdge(lost, searching, 1)
+states.printGraph()
 
-output = cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc(*'MJPG'), 30, (x_dim, y_dim))
+# we always start in the searching state
+states.setCurrentVertex(searching)
+
+print("Beginning main loop...")
 
 while True:
-    # read a frame from the webcam
-    ret, frame = cam.read()
-
-    # convert the frame to hsv
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-    # create a mask for the yellow color
-    mask = cv2.inRange(hsv, low_yellow, high_yellow)
-    
-    # dilate the mask
-    # make a circular kernel
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    mask = cv2.erode(mask, kernel, iterations=2)
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10))
-    mask = cv2.dilate(mask, kernel, iterations=2)
-
-    # find the contours of the yellow object
-    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    # filter out any contours that are less than 0.5% of the image
-    temp = [contour for contour in contours if cv2.contourArea(contour) > 0.005 * x_dim * y_dim]
-    contours = temp
-    
-    
-    if len(contours) > 0:
-        # find the center of the largest contour
-        largest_contour = max(contours, key=cv2.contourArea)
-        M = cv2.moments(largest_contour)
-        try:
-            cx = int(M['m10'] / M['m00'])
-            cy = int(M['m01'] / M['m00'])
-        except ZeroDivisionError:
-            cx, cy = -10, -10
-        
-        # draw a circle at the center of the largest contour
-        cv2.circle(frame, (cx, cy), 5, (0, 0, 255), -1)
-        
-        # draw the remaining contours
-        cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
-
-    # show the frame
-    cv2.imshow('frame', frame)
-    
-    output.write(frame)
-
-    # wait for a key press
-    key = cv2.waitKey(1)
-
-    # if the key is q, quit
-    if key == ord('q'):
+    # get the robot position
+    robotPosition = ser.getPose()
+    if cam.drawTarget() == False:
         break
+        
+    # find a target at the current location
+    if states.current_vertex is searching:
+        # if this is the first time we've been in this state recently
+        if not searching.isVisited:
+            print("Searching for a target...")
+            searching.isVisited = True
+            searching.data = time()
+        
+        is_aquired = cam.aquire_target()
+        if is_aquired:
+            states.setCurrentVertex(following)
+            searching.isVisited = False
+        elif time() - searching.data > 10:
+            states.setCurrentVertex(search_relocation)
+            search_relocation.isVisited = False
+    
+    # rellocate to find a target
+    if states.current_vertex is search_relocation:
+        # if this is the first time we've been in this state recently
+        if not search_relocation.isVisited:
+            print("Relocating to find a target...")
+            search_relocation.isVisited = True
+            search_relocation.data = time()
+            targetPosition = robotPosition.copy()
+            targetPosition[2] += pi/2
+            ser.setTargetPose(0, targetPosition[2])
+                
+        if (robotPosition[2]-targetPosition[2]) < 0.1 or time() - search_relocation.data > 10:
+            states.setCurrentVertex(searching)
+            searching.data = time()
+            search_relocation.isVisited = False
+    
+    if states.current_vertex is lost:
+        print("Could not relloate target...")
+        states.setCurrentVertex(searching)
+    
+    if states.current_vertex is following:
+        # if this is the first time we've been in this state recently
+        if not following.isVisited:
+            print("Target found, beggining to follow...")
+            following.isVisited = True
+            following.data = time()
+        
+        # get the target's position
+        target = cam.getTarget()
+        
+        if target == False:
+            # stop moving
+            ser.setTargetPose(0, robotPosition[2])
+            
+            if time() - following.data > 2:
+                states.setCurrentVertex(reaquire)
+                following.isVisited = False
+            continue
+        
+        # calculate the velocity
+        velocity = 10000*(0.1 - target[2])
+        
+        # calculate the angle
+        angle = 0.5 - target[0]/cam.width
+        
+        # set the target pose
+        ser.setTargetPose(velocity, angle+robotPosition[2])
+    
+    
+    # TODO: make this more than just a repeat of the search state
+    if states.current_vertex is reaquire:
+        # stop moving
+        ser.setTargetPose(0, robotPosition[2])
+        
+        # if this is the first time we've been in this state recently
+        if not reaquire.isVisited:
+            print("Target lost, reaquiring...")
+            reaquire.isVisited = True
+            reaquire.data = time()
+        
+        # try to reaquire the target
+        is_aquired = cam.aquire_target()
+        
+        if is_aquired == True:
+            reaquire.isVisited = False
+            states.setCurrentVertex(following)
+            continue
+            
+            
+        if time() - reaquire.data > 5:
+            states.setCurrentVertex(lost)
+            reaquire.isVisited = False
+            
 
-cam.release()
-output.release()
-cv2.destroyAllWindows()
+cam.cleanup()

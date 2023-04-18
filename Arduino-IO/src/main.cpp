@@ -101,8 +101,8 @@ void doSerialCommand(int * args, int args_length) {
       break;
     }
     case GET_POSITION:{
-      Serial.print("!MTR_READ,");
-      bleSerial.print("!MTR_READ,");
+      Serial.print("!POSE_READ,");
+      bleSerial.print("!POSE_READ,");
       // print the current pose
       xyzData pose = (wheels.getCurrentPose());
       for(auto i = 0; i < 3; i++) {
@@ -127,8 +127,8 @@ void doSerialCommand(int * args, int args_length) {
     // set the current pose
     case SET_POSITION:{
       if(args_length < 3) break;
-      Serial.print("!MTR_WRT,");
-      bleSerial.print("!MTR_WRT,");
+      Serial.print("!POSE_WRT,");
+      bleSerial.print("!POSE_WRT,");
       Serial.print(float(args[1])/1000.0, 3);
       bleSerial.print(float(args[1])/1000.0, 3);
       Serial.print(",");

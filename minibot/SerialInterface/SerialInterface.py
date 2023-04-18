@@ -85,11 +85,14 @@ class SerialInterface:
         return True
     
     def getPose(self):
-        return self.getItem("1", "MTR_READ")
+        respone = None
+        while respone is None:
+            respone = self.getItem("1", "POSE_READ")
+        return respone
         
     def setTargetPose(self, velocity, angle):
         message = "!2,"+str(velocity)+","+str(angle * 180 / 3.14159265359)+";\n"
-        return self.setItem(message, "MTR_WRT")
+        return self.setItem(message, "POSE_WRT")
     
     def setVelocityConstants(self, kp, ki, kd):
         message = "!3,"+str(kp)+","+str(ki)+","+str(kd)+";\n"
@@ -112,8 +115,8 @@ class SerialInterface:
 
 
 if __name__ == "__main__":
-    # ser = SerialInterface('/dev/ttyUSB0', 115200)
-    ser = SerialInterface('COM5', 115200)
+    ser = SerialInterface('/dev/ttyUSB0', 115200)
+    # ser = SerialInterface('COM5', 115200)
     print("Starting")
     #time.sleep(5)
     
