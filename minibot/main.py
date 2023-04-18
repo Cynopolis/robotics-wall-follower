@@ -9,6 +9,7 @@ from math import pi
 cam = Vision()
 ser = SerialInterface('/dev/ttyUSB0', 115200)
 
+enableVisuals = False # disable this if you're using ssh because it slows down the program.
 robotPosition = ser.getPose()
 targetPosition = robotPosition.copy()
 
@@ -36,8 +37,9 @@ print("Beginning main loop...")
 while True:
     # get the robot position
     robotPosition = ser.getPose()
-    if cam.drawTarget() == False:
-        break
+    if enableVisuals == True:
+        if cam.drawTarget() == False:
+            break
         
     # find a target at the current location
     if states.current_vertex is searching:
@@ -46,12 +48,13 @@ while True:
             print("Searching for a target...")
             searching.isVisited = True
             searching.data = time()
+            ser.setTargetPose(0, robotPosition[2])
         
         is_aquired = cam.aquire_target()
         if is_aquired:
             states.setCurrentVertex(following)
             searching.isVisited = False
-        elif time() - searching.data > 10:
+        elif time() - searching.data > 2:
             states.setCurrentVertex(search_relocation)
             search_relocation.isVisited = False
     
@@ -95,10 +98,10 @@ while True:
             continue
         
         # calculate the velocity
-        velocity = 10000*(0.1 - target[2])
+        velocity = 15000*(0.05 - target[2])
         
         # calculate the angle
-        angle = 0.5 - target[0]/cam.width
+        angle = 4*(0.5 - target[0]/cam.width)
         
         # set the target pose
         ser.setTargetPose(velocity, angle+robotPosition[2])
@@ -106,8 +109,8 @@ while True:
     
     # TODO: make this more than just a repeat of the search state
     if states.current_vertex is reaquire:
-        # stop moving
-        ser.setTargetPose(0, robotPosition[2])
+        # move backwards a little
+        ser.setTargetPose(-300, robotPosition[2])
         
         # if this is the first time we've been in this state recently
         if not reaquire.isVisited:
@@ -121,12 +124,13 @@ while True:
         if is_aquired == True:
             reaquire.isVisited = False
             states.setCurrentVertex(following)
+            ser.setTargetPose(0, robotPosition[2])
             continue
             
             
-        if time() - reaquire.data > 5:
+        if time() - reaquire.data > 6:
             states.setCurrentVertex(lost)
             reaquire.isVisited = False
-            
+            ser.setTargetPose(0, robotPosition[2])
 
 cam.cleanup()
