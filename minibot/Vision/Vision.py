@@ -24,6 +24,7 @@ class Vision:
         self.target_aquired = False
         self.last_frame = None
         self.target = [0, 0, 0]
+        self.no_target_found_count = 0
         return
     
     def __get_objects(self):
@@ -44,6 +45,7 @@ class Vision:
         mask = cv2.erode(mask, kernel, iterations=2)
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10))
         mask = cv2.dilate(mask, kernel, iterations=2)
+        cv2.imshow("mask", mask)
 
         # find the contours of the yellow object
         contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -82,9 +84,17 @@ class Vision:
         
         contours = self.__get_objects()
         if contours == False:
-            return False
+            self.no_target_found_count += 1
+            if self.no_target_found_count > 10:
+                self.target_aquired = False
+                return False
+            return self.target
         if len(contours) == 0:
-            return False
+            self.no_target_found_count += 1
+            if self.no_target_found_count > 10:
+                self.target_aquired = False
+                return False
+            return self.target
         
         largest_contour = max(contours, key=cv2.contourArea)
         area = cv2.contourArea(largest_contour)/(self.width*self.height)
@@ -94,9 +104,14 @@ class Vision:
             cx = int(M['m10'] / M['m00'])
             cy = int(M['m01'] / M['m00'])
         except ZeroDivisionError:
-            return False
+            self.no_target_found_count += 1
+            if self.no_target_found_count > 10:
+                self.target_aquired = False
+                return False
+            return self.target
         
-        low_pass = 0.2
+        self.no_target_found_count = 0
+        low_pass = 0.5
         self.target[0] = low_pass * self.target[0] + (1 - low_pass) * cx
         self.target[1] = low_pass * self.target[1] + (1 - low_pass) * cy
         self.target[2] = low_pass * self.target[2] + (1 - low_pass) * area
