@@ -107,10 +107,10 @@ while True:
         
         
         # calculate the velocity
-        velocity = 6000*(0.04 - target[2])      
+        velocity = 15000*(0.04 - target[2])      
         
         # calculate the angle
-        angle = 1*(0.5 - target[0]/cam.width)
+        angle = 3*(0.5 - target[0]/cam.width)
         
         print("Velocity:", velocity, "Angle:", angle+robotPosition[2])
                
