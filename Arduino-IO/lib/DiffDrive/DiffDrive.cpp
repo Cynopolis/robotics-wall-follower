@@ -54,6 +54,18 @@ float DiffDrive::wrap_angle(float angle) {
     return angle;
 }
 
+float DiffDrive::angleDiff(float a, float b) {
+    // get the shortest difference between the two angles
+    // float d1 = abs(a - b);
+    // float d2 = -abs(a + b);
+    // if(abs(d1) < abs(d2)) {
+    //     return d1;
+    // } else {
+    //     return d2;
+    // }
+    return wrap_angle(a - b);
+}
+
 void DiffDrive::update(IMU* imu) {
     /**
      * This section calculates the time since the last update
@@ -106,7 +118,7 @@ void DiffDrive::update(IMU* imu) {
     */
     // calculate the error between the current pose and the target pose
     float avg_vel = (leftMotor->getVelocity() + rightMotor->getVelocity()) / 2.0;
-    xyzData error = targetPose - xyzData(avg_vel, 0, currentPose.z);
+    xyzData error = xyzData(targetPose.x - avg_vel, 0, angleDiff(targetPose.z, currentPose.z));
     sumError = sumError + (error * dt);
     xyzData dError = (error - lastError) / dt;
     lastError = error;

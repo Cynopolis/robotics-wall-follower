@@ -66,7 +66,7 @@ void setup() {
   leftMotor.setPID(kp, ki, kd);
   rightMotor.setPID(kp, ki, kd);
   wheels.begin();
-  wheels.setAnglePID(1,1,0);
+  wheels.setAnglePID(2,0.75,0);
   wheels.setVelocityPID(1, 0, 0);
   // wheels.setPID(0, 0, 0);
   // // attach the interrupts
