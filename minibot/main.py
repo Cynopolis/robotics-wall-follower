@@ -121,9 +121,16 @@ while True:
     
     # TODO: make this more than just a repeat of the search state
     if states.current_vertex is reaquire:
-        # move backwards a little
+        # get the last known position of the target
+        last_pos = cam.target
+        
+        # determine whether to move forward or backward based on the last known position
+        vel = 7000*(0.04 - last_pos[2]) - 3000*(0.5 + last_pos[1]/cam.height)
+        # determine how much to rotate based on the last known position
+        angle = 3*(0.5 - last_pos[0]/cam.width)
+        
         if not disableSerial:
-            ser.setTargetPose(-300, robotPosition[2])
+            ser.setTargetPose(vel, angle+robotPosition[2])
         
         # if this is the first time we've been in this state recently
         if not reaquire.isVisited:
