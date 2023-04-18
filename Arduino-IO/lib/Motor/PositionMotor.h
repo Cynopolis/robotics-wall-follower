@@ -82,15 +82,14 @@ class PositionMotor : public Motor{
         void update();
     
     protected:
-        uint16_t minAngle;
-        uint16_t maxAngle;
-
         float unitPerPulse = 1; // the units per number of encoder pulses. IE: mm per pulse or degrees per pulse
         volatile int * incriment;
         long lastEncoderCount = 0;
         long encoderCount = 0;
         float targetPosition;
 
+        uint16_t minAngle;
+        uint16_t maxAngle;
 
         unsigned long lastTime = 0;
         float kp = 1;

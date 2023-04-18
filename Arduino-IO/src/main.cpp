@@ -33,7 +33,7 @@ void rightEncoderInc(){
 
 SpeedMotor leftMotor(LEFT_MOTOR_FORWARD_PIN, LEFT_MOTOR_BACK_PIN, LEFT_MOTOR_PWM_PIN, 0,  &leftEncoderCount);
 SpeedMotor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACK_PIN, RIGHT_MOTOR_PWM_PIN, 1, &rightEncoderCount);
-DiffDrive wheels(&leftMotor, &rightMotor, 125); //151/1.86
+DiffDrive wheels(&leftMotor, &rightMotor, 0.125); //151/1.86
 IMU imu;
 
 // Object to handle serial communication
@@ -66,6 +66,7 @@ void setup() {
   leftMotor.setPID(kp, ki, kd);
   rightMotor.setPID(kp, ki, kd);
   wheels.begin();
+  wheels.setAnglePID(1,1,0);
   wheels.setVelocityPID(1, 0, 0);
   // wheels.setPID(0, 0, 0);
   // // attach the interrupts
@@ -125,19 +126,19 @@ void doSerialCommand(int * args, int args_length) {
     }
     // set the current pose
     case SET_POSITION:{
-      if(args_length < 4) break;
+      if(args_length < 3) break;
       Serial.print("!MTR_WRT,");
       bleSerial.print("!MTR_WRT,");
-      for(int i = 1; i < args_length; i++) {
-        Serial.print(args[i]);
-        bleSerial.print(args[i]);
-        Serial.print(",");
-        bleSerial.print(",");
-      }
+      Serial.print(float(args[1])/1000.0, 3);
+      bleSerial.print(float(args[1])/1000.0, 3);
+      Serial.print(",");
+      bleSerial.print(",");
+      Serial.print(float(args[2])*PI/180);
+      bleSerial.print(float(args[2])*PI/180);
       Serial.println(";");
       bleSerial.println(";");
       // set the new target pose
-      wheels.setCurrentPose(args[1], args[2], float(args[3])*PI/180);
+      wheels.setTargetPose(float(args[1])/1000, float(args[2])*PI/180);
       //wheels.print();
       break;
     }
@@ -162,14 +163,14 @@ void doSerialCommand(int * args, int args_length) {
       Serial.print("!ANGLEWRT,");
       bleSerial.print("!ANGLEWRT,");
       for(int i = 1; i < args_length; i++) {
-        Serial.print(float(args[i])/1000.0);
-        bleSerial.print(float(args[i])/1000.0);
+        Serial.print(float(args[i])/1000.0,3);
+        bleSerial.print(float(args[i])/1000.0,3);
         Serial.print(",");
         bleSerial.print(",");
       }
       Serial.println(";");
       bleSerial.println(";");
-      wheels.setVelocityPID(float(args[1])/1000.0, float(args[2])/1000.0, float(args[3])/1000.0);
+      wheels.setAnglePID(float(args[1])/1000.0, float(args[2])/1000.0, float(args[3])/1000.0);
       break;
     }
     // set the motor pid constants
