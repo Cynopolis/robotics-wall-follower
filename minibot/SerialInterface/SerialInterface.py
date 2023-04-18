@@ -1,15 +1,6 @@
 import serial
 import time
 
-# ser = serial.Serial('COM4', 9600)
-
-
-# message = ser.readline()
-# message = message.decode().strip()
-# header, parsed_data = process_message(message)
-# print(header, parsed_data)
-
-
 class SerialInterface:
     def __init__(self, com, baud_rate) -> None:
         '''
@@ -55,69 +46,90 @@ class SerialInterface:
         
         return header, parsed_data
 
-    def getPose(self):
-        message = ""
-        self.serial.write(b'!0;\n')
-        # keep reading until a ';' is found or the timeout is reached
+    def getItem(self, command, return_key, timeout=1):
+        return_message = ""
+        # create the command and write it to the serial
+        command = ("!"+command+";\n").encode('UTF-8')
+        
+        # wait for the return message to be recieved or the timeout to be reached
         timer = time.time()
-        while message.find("!MTR,") == -1 and time.time()-timer < 1:
-            message = self.serial.readline().decode('UTF-8').strip()
-        # parse the serial into a header and list
-        header, data = self.process_message(message)
+        while return_message.find(return_key) == -1 and time.time()-timer < timeout:
+            self.serial.write(command)
+            return_message = self.serial.readline().decode('UTF-8').strip()
         
-        if(header != "MTR"):
-            return []
+        # parse the return message
+        header, data = self.process_message(return_message)
         
+        # check if the header is the correct one
+        if header != return_key:
+            return None
+        
+        # return the data
         return data
     
-    def setTargetPose(self, x, y, theta):
-        message = "!1,"+str(x)+","+str(y)+","+str(theta * 180 / 3.14159265359)+";\n"
-        # keep writing until the response MTR_WRT is recieved or the timeout is reached
+    def setItem(self, command, return_key, timeout=1):
+        # create the command and write it to the serial
+        command = command.encode('UTF-8')
         timer = time.time()
         return_msg = ""
-        while return_msg.find(";") == -1 and time.time()-timer < 1:
-            self.serial.write(message.encode('UTF-8'))
-            return_msg = self.serial.readline().decode('UTF-8').strip()
-    
-    def incrimentPose(self, x, y, theta):
-        message = "!3,"+str(x)+","+str(y)+","+str(theta * 180 / 3.14159265359)+";\n"
-        # keep writing until the response MTR_WRT is recieved or the timeout is reached
-        timer = time.time()
-        return_msg = ""
-        while return_msg.find(";") == -1 and time.time()-timer < 1:
-            self.serial.write(message.encode('UTF-8'))
+        # keep writing until the response is recieved or the timeout is reached
+        while return_msg.find(return_key) == -1 and time.time()-timer < timeout:
+            self.serial.write(command)
             return_msg = self.serial.readline().decode('UTF-8').strip()
         
+        header, _ = self.process_message(return_msg)
+        
+        if header != return_key:
+            return False
+        
+        return True
     
-    def setGains(self, k_rho, k_alpha, k_beta):
-        message = "!2,"+str(k_rho*1000)+","+str(k_alpha*1000)+","+str(k_beta*1000)+";\n"
-        # keep writing until the response CONSTWRT is recieved or the timeout is reached
-        timer = time.time()
-        return_msg = ""
-        while return_msg.find("CONSTWRT") != -1 and time.time()-time < 1:
-            self.serial.write(message.encode('UTF-8'))
-            return_msg = self.serial.readline().decode('UTF-8').strip()
+    def getPose(self):
+        return self.getItem("1", "MTR_READ")
+        
+    def setTargetPose(self, velocity, angle):
+        message = "!2,"+str(velocity)+","+str(angle * 180 / 3.14159265359)+";\n"
+        return self.setItem(message, "MTR_WRT")
     
-    def update(self):
-        '''
-        Parses serial into a header and list, then parsed_data is stored to the serial list.
-        Meant to be called continuously
-        '''
-        # get a line of serial
-        try:
-            message = self.serial.readline().decode('UTF-8').strip()
-        except UnicodeDecodeError:
-            print("Bad shit happened")
-            return
-        # parse the serial into a header and list
-        header, parsed_data = self.process_message(message)
+    def setVelocityConstants(self, kp, ki, kd):
+        message = "!3,"+str(kp)+","+str(ki)+","+str(kd)+";\n"
+        return self.setItem(message, "VELWRT")
+    
+    def setAngleConstants(self, kp, ki, kd):
+        message = "!4,"+str(kp)+","+str(ki)+","+str(kd)+";\n"
+        return self.setItem(message, "ANGLEWRT")
+    
+    def setMotorConstants(self, motor_number, kp, ki, kd):
+        message = "!5,"+str(motor_number)+str(kp)+","+str(ki)+","+str(kd)+";\n"
+        
+        if motor_number == 0:
+            return self.setItem(message, "LEFTMTRPID")
+        elif motor_number == 1:
+            return self.setItem(message, "RIGHTMTRPID")
+        
+        return False
+    
 
 
 if __name__ == "__main__":
-    ser = SerialInterface('/dev/ttyUSB0', 115200)
+    # ser = SerialInterface('/dev/ttyUSB0', 115200)
+    ser = SerialInterface('COM5', 115200)
+    print("Starting")
+    #time.sleep(5)
     
-    print(ser.getPose())
-    ser.setTargetPose(100, 0, 90)
+    response = None
+    while response == None:
+        response = ser.getPose()
+        print(response)
+    print("Setting target pose to 100 velocity and 90 degrees")
+    print(ser.setTargetPose(100, 3.14159265359/2))
+    time.sleep(5)
+    print("Setting target pose to 100 velocity and 90 degrees")
+    print(ser.setTargetPose(1000, 0))
+    time.sleep(5)
+    print("Stopping motors")
+    print(ser.setTargetPose(0, 0))
+    print("final pose:")
     print(ser.getPose())
 
         

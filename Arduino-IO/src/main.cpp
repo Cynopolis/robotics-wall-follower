@@ -53,7 +53,7 @@ void setup() {
   Serial.begin(115200);
   bleSer.init();
   delay(1000);
-  imu.begin();
+  // imu.begin();
 
   Serial.println("Starting up...");
   bleSerial.println("Starting up...");
@@ -73,15 +73,15 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(LEFT_ENC_A_PIN), leftEncoderInc, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RIGHT_ENC_A_PIN), rightEncoderInc, CHANGE);
 
-  // spawn a task to handle reading from the IMU
-  xTaskCreatePinnedToCore(
-    imuTask, /* Function to implement the task */
-    "IMU Task", /* Name of the task */
-    10000,  /* Stack size in words */
-    NULL,  /* Task input parameter */
-    1,  /* Priority of the task */
-    NULL,  /* Task handle. */
-    0); /* Core where the task should run */
+  // // spawn a task to handle reading from the IMU
+  // xTaskCreatePinnedToCore(
+  //   imuTask, /* Function to implement the task */
+  //   "IMU Task", /* Name of the task */
+  //   10000,  /* Stack size in words */
+  //   NULL,  /* Task input parameter */
+  //   1,  /* Priority of the task */
+  //   NULL,  /* Task handle. */
+  //   0); /* Core where the task should run */
   
   // servo.attach(servo_pin);
   // servo.write(90);
@@ -101,8 +101,8 @@ void doSerialCommand(int * args, int args_length) {
       break;
     }
     case GET_POSITION:{
-      Serial.print("!MTR,");
-      bleSerial.print("!MTR,");
+      Serial.print("!MTR_READ,");
+      bleSerial.print("!MTR_READ,");
       // print the current pose
       xyzData pose = (wheels.getCurrentPose());
       for(auto i = 0; i < 3; i++) {
@@ -202,19 +202,6 @@ void doSerialCommand(int * args, int args_length) {
       bleSerial.println("!ERR;");
       break;
     }
-    // case 3:{
-    //   if(args_length < 4) break;
-    //   Serial.print("!INCWRT,");
-    //   bleSerial.print("!INCWRT,");
-    //   for(int i = 1; i < args_length; i++) {
-    //     Serial.print(float(args[i]));
-    //     bleSerial.print(float(args[i]));
-    //     Serial.print(",");
-    //     bleSerial.print(",");
-    //   }
-    //   Serial.println(";");
-    //   xyzData currentPose = wheels.getCurrentPose();
-    //   wheels.setTargetPose(currentPose.x + args[1], currentPose.y + args[2], currentPose.z + float(args[3])*PI/180);
   }
 }
 
