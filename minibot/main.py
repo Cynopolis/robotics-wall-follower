@@ -7,7 +7,7 @@ from time import time
 from math import pi
 
 enableVisuals = True # disable this if you're using ssh because it slows down the program.
-disableSerial = False # disable this if you're not using the serial interface
+disableSerial = True # disable this if you're not using the serial interface
 
 cam = Vision()
 if not disableSerial:

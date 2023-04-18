@@ -41,7 +41,7 @@ class Vision:
         
         # dilate the mask
         # make a circular kernel
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
         mask = cv2.erode(mask, kernel, iterations=2)
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10))
         mask = cv2.dilate(mask, kernel, iterations=2)
