@@ -1,9 +1,23 @@
 import cv2
 
+def testDevice(num_device_to_test):
+    good_devices = []
+    for i in range(num_device_to_test):
+        cap = cv2.VideoCapture(i) 
+        if cap is None or not cap.isOpened():
+            pass
+        else:
+            good_devices.append(i)
+    return good_devices
+
 class Vision:
     
     def __init__(self, camera = 0):
-        self.cam = cv2.VideoCapture(camera)
+        if camera == 0:
+            cams = testDevice(10)
+            self.cam = cv2.VideoCapture(cams[len(cams)-1])
+        else:
+            self.cam = cv2.VideoCapture(camera)
         # get the width and height of the camera
         self.width = int(self.cam.get(3))
         self.height = int(self.cam.get(4))
