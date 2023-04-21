@@ -55,7 +55,7 @@ class Vision:
         
         
     
-    def aquire_target(self, low_color=(20, 100, 100), high_color=(30, 255, 255)):
+    def aquire_target(self, low_color=(0, 50, 50), high_color=(20, 255, 255)):
         '''
         Aquires a target of the given color from the camera. The default color is yellow
         returns: true if a target was found, false otherwise
