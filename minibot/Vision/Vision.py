@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 def testDevice(num_device_to_test):
     good_devices = []
@@ -9,6 +10,11 @@ def testDevice(num_device_to_test):
         else:
             good_devices.append(i)
     return good_devices
+
+def ellipse_inRange(image, color, radius, color0_factor = 1, color1_factor = 1, color2_factor = 1):
+        color_factor = np.array([1/color0_factor, 1/color1_factor, 1/color2_factor])
+        mask = np.sqrt(np.sum(np.square(np.multiply(image - color, color_factor)), axis=2)) < radius
+        return mask.astype(np.uint8) * 255
 
 class Vision:
     
@@ -36,8 +42,7 @@ class Vision:
         # convert the frame to hsv
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         
-        #create a mask for the given color
-        mask = cv2.inRange(hsv, self.low_color, self.high_color)
+        mask = ellipse_inRange(hsv, self.middle_color, 50, 0.25, 3, 3)
         
         # dilate the mask
         # make a circular kernel
@@ -55,13 +60,14 @@ class Vision:
         
         
     
-    def aquire_target(self, low_color=(0, 50, 50), high_color=(20, 255, 255)):
+    def aquire_target(self, low_color=(20, 100, 100), high_color=(30, 255, 255)):
         '''
         Aquires a target of the given color from the camera. The default color is yellow
         returns: true if a target was found, false otherwise
         '''
         self.low_color = low_color
         self.high_color = high_color
+        self.middle_color = (25, 200, 200)
         
         contours = self.__get_objects()
         if contours == False:
