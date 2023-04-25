@@ -42,7 +42,7 @@ class Vision:
         # convert the frame to hsv
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         
-        mask = ellipse_inRange(hsv, self.middle_color, 50, 0.25, 3, 3)
+        mask = ellipse_inRange(hsv, self.middle_color, 45, 0.25, 2.5, 2.5)
         
         # dilate the mask
         # make a circular kernel
