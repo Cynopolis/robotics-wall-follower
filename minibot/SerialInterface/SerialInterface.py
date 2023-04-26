@@ -134,5 +134,3 @@ if __name__ == "__main__":
     print(ser.setTargetPose(0, 0))
     print("final pose:")
     print(ser.getPose())
-
-        
