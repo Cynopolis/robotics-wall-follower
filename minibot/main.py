@@ -129,6 +129,11 @@ while True:
         # determine how much to rotate based on the last known position
         angle = 3*(0.5 - last_pos[0]/cam.width)
         
+        if abs(vel) < 50:
+            vel = 0
+            if abs(angle) < 0.1:
+                angle = 0
+        
         if not disableSerial:
             ser.setTargetPose(vel, angle+robotPosition[2])
         
