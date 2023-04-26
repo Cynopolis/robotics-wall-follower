@@ -112,6 +112,11 @@ while True:
         # calculate the angle
         angle = 3*(0.5 - target[0]/cam.width)
         
+        if abs(velocity) < 50:
+            velocity = 0
+            if abs(angle) < 0.1:
+                angle = 0
+        
         print("Velocity:", velocity, "Angle:", angle+robotPosition[2])
                
         # set the target pose
@@ -128,11 +133,6 @@ while True:
         vel = 7000*(0.04 - last_pos[2]) - 3000*(0.5 + last_pos[1]/cam.height)
         # determine how much to rotate based on the last known position
         angle = 3*(0.5 - last_pos[0]/cam.width)
-        
-        if abs(vel) < 50:
-            vel = 0
-            if abs(angle) < 0.1:
-                angle = 0
         
         if not disableSerial:
             ser.setTargetPose(vel, angle+robotPosition[2])
